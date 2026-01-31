@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DistroMatch - Find Your Perfect Linux Distribution</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0e27;
+      --bg-secondary: #151b3d;
+      --bg-card: #1a2142;
+      --accent-primary: #00ff88;
+      --accent-secondary: #00d4ff;
+      --accent-tertiary: #ff006e;
+      --text-primary: #e8f0ff;
+      --text-secondary: #8b9dc3;
+      --border-color: #2a3859;
+      --shadow: 0 8px 32px rgba(0, 255, 136, 0.1);
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.02) 0%, transparent 50%);
+      animation: drift 30s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(5%, 5%) rotate(3deg); }
+      66% { transform: translate(-3%, 3%) rotate(-2deg); }
+    }
+
+    /* Header */
+    header {
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 2px solid var(--border-color);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tagline {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      font-weight: 300;
+      animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 1.5rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+      position: relative;
+    }
+
+    nav button:hover {
+      color: var(--accent-primary);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    nav button.active {
+      color: var(--accent-primary);
+      background: rgba(0, 255, 136, 0.15);
+    }
+
+    nav button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40%;
+      height: 2px;
+      background: var(--accent-primary);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    /* Sections */
+    .section {
+      display: none;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Quiz Section */
+    .quiz-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .question-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+      animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .question-number {
+      color: var(--accent-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .question-text {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: var(--text-primary);
+    }
+
+    .wiki-term {
+      color: var(--accent-primary);
+      cursor: help;
+      border-bottom: 2px dotted var(--accent-primary);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .wiki-term:hover {
+      color: var(--accent-secondary);
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .options {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .option:hover::before {
+      left: 100%;
+    }
+
+    .option:hover {
+      border-color: var(--accent-primary);
+      background: rgba(0, 255, 136, 0.05);
+      transform: translateX(8px);
+    }
+
+    .option.selected {
+      border-color: var(--accent-primary);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .option-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .option-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .quiz-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-primary);
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Results Section */
+    .result-card {
+      background: var(--bg-card);
+      border: 2px solid var(--accent-primary);
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .result-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .result-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+    }
+
+    .result-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .result-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .detail-item {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-primary);
+    }
+
+    .detail-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-value {
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    /* Alternative Distros */
+    .alternatives {
+      margin-top: 3rem;
+    }
+
+    .alternatives h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+
+    .alt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .alt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .alt-card:hover {
+      border-color: var(--accent-secondary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+    }
+
+    .alt-card h4 {
+      color: var(--accent-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .alt-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Wiki/Comments Section */
+    .distro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .distro-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .distro-card:hover {
+      border-color: var(--accent-primary);
+      box-shadow: var(--shadow);
+      transform: translateY(-4px);
+    }
+
+    .distro-card h3 {
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .distro-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--accent-primary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Comments */
+    .comments-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .comment {
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--accent-primary);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .comment-date {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .comment-text {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .comment-form {
+      margin-top: 1.5rem;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .comment-form textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: var(--bg-card);
+      border: 2px solid var(--accent-primary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 350px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      animation: tooltipFade 0.3s ease-out;
+    }
+
+    @keyframes tooltipFade {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tooltip h4 {
+      color: var(--accent-primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .tooltip p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Auth */
+    .auth-section {
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      background: white;
+      color: #333;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .google-btn:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-primary);
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      overflow-y: auto;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 2px solid var(--accent-primary);
+      border-radius: 20px;
+      padding: 3rem;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: scaleIn 0.4s ease-out;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+
+    .modal-close:hover {
+      color: var(--accent-tertiary);
+      background: rgba(255, 0, 110, 0.1);
+      transform: rotate(90deg);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      nav {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      nav button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .question-card {
+        padding: 2rem;
+      }
+
+      .question-text {
+        font-size: 1.4rem;
+      }
+
+      .container {
+        padding: 2rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>DistroMatch</h1>
+    <p class="tagline">Find your perfect Linux distribution in minutes</p>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" data-section="quiz">Quiz</button>
+    <button class="nav-btn" data-section="explore">Explore Distros</button>
+    <button class="nav-btn" data-section="wiki">Wiki</button>
+    <div style="flex-grow: 1"></div>
+    <div id="authContainer"></div>
+  </nav>
+
+  <div class="container">
+    <!-- Quiz Section -->
+    <section id="quiz" class="section active">
+      <div class="quiz-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div id="quizContent"></div>
+      </div>
+    </section>
+
+    <!-- Explore Section -->
+    <section id="explore" class="section">
+      <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">Explore Linux Distributions</h2>
+      <div class="distro-grid" id="distroGrid"></div>
+    </section>
+
+    <!-- Wiki Section -->
+    <section id="wiki" class="section">
+      <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">Linux Terms & Concepts</h2>
+      <div class="distro-grid" id="wikiGrid"></div>
+    </section>
+  </div>
+
+  <!-- Tooltip -->
+  <div class="tooltip" id="tooltip"></div>
+
+  <!-- Modal for Distro Details -->
+  <div class="modal" id="distroModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Data
+    const wikiTerms = {
+      immutable: {
+        title: 'Immutable',
+        description: 'An immutable distro prevents changes to core system files. Updates are atomic (all-or-nothing), making the system more stable and easier to rollback if something breaks.'
+      },
+      rolling: {
+        title: 'Rolling Release',
+        description: 'Continuous updates without major version upgrades. You always have the latest software, but updates are more frequent and occasionally less stable.'
+      },
+      stable: {
+        title: 'Stable/LTS Release',
+        description: 'Fixed release cycle with long-term support. Updates are less frequent but thoroughly tested. Great for reliability over bleeding-edge features.'
+      },
+      packageManager: {
+        title: 'Package Manager',
+        description: 'Software that installs, updates, and manages your applications. Different distros use different package managers (apt, dnf, pacman, etc.).'
+      },
+      desktop: {
+        title: 'Desktop Environment',
+        description: 'The graphical interface you interact with. Popular options include GNOME (modern), KDE Plasma (customizable), and XFCE (lightweight).'
+      },
+      arch: {
+        title: 'Arch-based',
+        description: 'Distros built on Arch Linux. Known for rolling releases, the AUR (huge software repository), and DIY philosophy.'
+      },
+      debian: {
+        title: 'Debian-based',
+        description: 'Distros built on Debian. Very stable, huge software repositories, uses APT package manager. Ubuntu is the most popular Debian derivative.'
+      },
+      fedora: {
+        title: 'Fedora-based',
+        description: 'Distros built on Fedora/Red Hat. Cutting-edge features, uses DNF/RPM package manager, sponsored by Red Hat.'
+      },
+      independent: {
+        title: 'Independent',
+        description: 'Distros not based on other major distros. Built from scratch with unique philosophies and tools.'
+      },
+      grub: {
+        title: 'GRUB Bootloader',
+        description: 'The most common Linux bootloader. Highly configurable, supports themes, and works with most systems. Default for most distros.'
+      },
+      systemdBoot: {
+        title: 'systemd-boot',
+        description: 'Simple, fast UEFI bootloader. Minimalist design with quick boot times. Used by some modern distros. UEFI only (no legacy BIOS).'
+      },
+      limine: {
+        title: 'Limine Bootloader',
+        description: 'Modern, fast bootloader with a beautiful interface. Supports both BIOS and UEFI. Gaining popularity for its speed and aesthetics.'
+      },
+      refind: {
+        title: 'rEFInd',
+        description: 'Boot manager with graphical interface that auto-detects operating systems. Great for dual-boot setups. UEFI only.'
+      }
+    };
+
+    const quizQuestions = [
+      {
+        id: 1,
+        question: 'How much Linux experience do you have?',
+        options: [
+          { value: 'beginner', label: 'Complete beginner', desc: 'Never used Linux before' },
+          { value: 'some', label: 'Some experience', desc: 'Used it a few times' },
+          { value: 'intermediate', label: 'Intermediate', desc: 'Comfortable with terminal' },
+          { value: 'advanced', label: 'Advanced', desc: 'I compile my own kernel' }
+        ]
+      },
+      {
+        id: 2,
+        question: 'Are you installing on a laptop or desktop?',
+        options: [
+          { value: 'laptop', label: 'Laptop', desc: 'Portability, battery life matters' },
+          { value: 'desktop', label: 'Desktop PC', desc: 'Stationary workstation' },
+          { value: 'both', label: 'Both/Multiple devices', desc: 'I want flexibility' }
+        ]
+      },
+      {
+        id: 3,
+        question: 'What GPU do you have?',
+        options: [
+          { value: 'nvidia', label: 'NVIDIA', desc: 'GeForce RTX/GTX series' },
+          { value: 'amd', label: 'AMD', desc: 'Radeon RX series' },
+          { value: 'intel', label: 'Intel', desc: 'Integrated graphics' },
+          { value: 'none', label: 'Not sure/No dedicated GPU', desc: 'Integrated or unknown' }
+        ]
+      },
+      {
+        id: 4,
+        question: 'How much RAM does your system have?',
+        options: [
+          { value: '4gb', label: '4GB or less', desc: 'Lightweight distros recommended' },
+          { value: '8gb', label: '8GB', desc: 'Sweet spot for most distros' },
+          { value: '16gb', label: '16GB or more', desc: 'Run anything comfortably' }
+        ]
+      },
+      {
+        id: 5,
+        question: 'Do you want an <span class="wiki-term" data-term="immutable">immutable</span> distro?',
+        options: [
+          { value: 'yes', label: 'Yes', desc: 'I want maximum stability and easy rollbacks' },
+          { value: 'no', label: 'No', desc: 'I want traditional filesystem access' },
+          { value: 'unsure', label: 'Not sure', desc: 'What\'s best for me?' }
+        ]
+      },
+      {
+        id: 6,
+        question: 'Which <span class="wiki-term" data-term="packageManager">base distribution</span> appeals to you?',
+        options: [
+          { value: 'debian', label: 'Debian-based', desc: 'Stable, huge community (Ubuntu, Mint)' },
+          { value: 'arch', label: 'Arch-based', desc: 'Rolling release, cutting-edge (Manjaro, EndeavourOS)' },
+          { value: 'fedora', label: 'Fedora-based', desc: 'Modern features, Red Hat backed' },
+          { value: 'independent', label: 'Independent', desc: 'Unique distros (NixOS, Void, etc.)' },
+          { value: 'any', label: 'No preference', desc: 'Show me what works best' }
+        ]
+      },
+      {
+        id: 7,
+        question: 'What <span class="wiki-term" data-term="desktop">desktop environment</span> do you prefer?',
+        options: [
+          { value: 'gnome', label: 'GNOME', desc: 'Modern, simple, touchpad-friendly' },
+          { value: 'kde', label: 'KDE Plasma', desc: 'Highly customizable, Windows-like' },
+          { value: 'xfce', label: 'XFCE/MATE', desc: 'Lightweight, traditional' },
+          { value: 'minimal', label: 'Minimal/WM', desc: 'Tiling window manager or bare minimum' },
+          { value: 'any', label: 'No preference', desc: 'I\'ll customize it myself' }
+        ]
+      },
+      {
+        id: 8,
+        question: 'Do you prefer <span class="wiki-term" data-term="rolling">rolling</span> or <span class="wiki-term" data-term="stable">stable</span> releases?',
+        options: [
+          { value: 'rolling', label: 'Rolling release', desc: 'Always latest software' },
+          { value: 'stable', label: 'Stable/LTS', desc: 'Tested and reliable' },
+          { value: 'semi', label: 'Semi-rolling', desc: 'Balance of both' },
+          { value: 'any', label: 'No preference', desc: 'Either works for me' }
+        ]
+      },
+      {
+        id: 9,
+        question: 'What will you primarily use Linux for?',
+        options: [
+          { value: 'daily', label: 'Daily driver', desc: 'Web browsing, office work' },
+          { value: 'gaming', label: 'Gaming', desc: 'Steam, Proton, performance' },
+          { value: 'development', label: 'Development', desc: 'Programming, servers, Docker' },
+          { value: 'creative', label: 'Creative work', desc: 'Graphics, audio, video editing' },
+          { value: 'server', label: 'Server/headless', desc: 'No GUI needed' }
+        ]
+      }
+    ];
+
+    const distros = [
+      {
+        name: 'Fedora Silverblue',
+        base: 'fedora',
+        immutable: true,
+        release: 'semi',
+        desktop: 'gnome',
+        difficulty: 'intermediate',
+        description: 'Immutable desktop OS based on Fedora with rpm-ostree. Perfect balance of stability and cutting-edge features.',
+        tags: ['Immutable', 'GNOME', 'Fedora', 'Flatpak'],
+        useCase: ['daily', 'development'],
+        website: 'https://fedoraproject.org/silverblue/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Ubuntu',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'gnome',
+        difficulty: 'beginner',
+        description: 'Most popular Linux distro. Great hardware support, massive community, beginner-friendly.',
+        tags: ['Beginner-friendly', 'GNOME', 'LTS', 'Popular'],
+        useCase: ['daily', 'development'],
+        website: 'https://ubuntu.com/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Linux Mint',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'xfce',
+        difficulty: 'beginner',
+        description: 'Windows-like experience, extremely beginner-friendly, based on Ubuntu with Cinnamon desktop.',
+        tags: ['Beginner-friendly', 'Cinnamon', 'User-friendly', 'Stable'],
+        useCase: ['daily'],
+        website: 'https://linuxmint.com/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '4gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Manjaro',
+        base: 'arch',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'any',
+        difficulty: 'some',
+        description: 'Arch made easy. Rolling release with delayed updates for stability. Multiple DE options.',
+        tags: ['Rolling', 'User-friendly', 'Arch', 'AUR'],
+        useCase: ['daily', 'gaming'],
+        website: 'https://manjaro.org/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'EndeavourOS',
+        base: 'arch',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'any',
+        difficulty: 'intermediate',
+        description: 'Near-vanilla Arch with easy installer. Community-driven, minimal bloat.',
+        tags: ['Arch', 'Rolling', 'Community', 'Minimal'],
+        useCase: ['daily', 'development'],
+        website: 'https://endeavouros.com/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '4gb',
+        bootloader: 'GRUB or systemd-boot (choice during install)'
+      },
+      {
+        name: 'Pop!_OS',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'gnome',
+        difficulty: 'beginner',
+        description: 'Ubuntu-based distro by System76. Excellent for gaming and development, great NVIDIA support.',
+        tags: ['Gaming', 'NVIDIA', 'GNOME', 'User-friendly'],
+        useCase: ['daily', 'gaming', 'development'],
+        website: 'https://pop.system76.com/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'systemd-boot'
+      },
+      {
+        name: 'Fedora Workstation',
+        base: 'fedora',
+        immutable: false,
+        release: 'semi',
+        desktop: 'gnome',
+        difficulty: 'intermediate',
+        description: 'Cutting-edge features, sponsored by Red Hat. Great for developers.',
+        tags: ['Modern', 'GNOME', 'DNF', 'Innovative'],
+        useCase: ['daily', 'development'],
+        website: 'https://fedoraproject.org/workstation/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Arch Linux',
+        base: 'arch',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'minimal',
+        difficulty: 'advanced',
+        description: 'DIY distro. Build exactly what you want. Amazing documentation (Arch Wiki). NVIDIA requires manual setup.',
+        tags: ['DIY', 'Rolling', 'Minimal', 'Advanced'],
+        useCase: ['development'],
+        website: 'https://archlinux.org/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '4gb',
+        bootloader: 'Choose any (GRUB, systemd-boot, Limine, rEFInd)'
+      },
+      {
+        name: 'Debian',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'any',
+        difficulty: 'intermediate',
+        description: 'The universal OS. Rock-solid stability, foundation for Ubuntu. Best for servers.',
+        tags: ['Stable', 'Universal', 'Server', 'Reliable'],
+        useCase: ['daily', 'server', 'development'],
+        website: 'https://www.debian.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '4gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'NixOS',
+        base: 'independent',
+        immutable: true,
+        release: 'any',
+        desktop: 'any',
+        difficulty: 'advanced',
+        description: 'Declarative configuration, atomic upgrades, perfect reproducibility. Unique and powerful.',
+        tags: ['Declarative', 'Reproducible', 'Advanced', 'Unique'],
+        useCase: ['development', 'server'],
+        website: 'https://nixos.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '8gb',
+        bootloader: 'systemd-boot (default) or GRUB'
+      },
+      {
+        name: 'openSUSE Tumbleweed',
+        base: 'independent',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'any',
+        difficulty: 'intermediate',
+        description: 'Rolling release with excellent QA. YaST makes system config easy.',
+        tags: ['Rolling', 'YaST', 'Tested', 'Enterprise'],
+        useCase: ['daily', 'development'],
+        website: 'https://www.opensuse.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Zorin OS',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'gnome',
+        difficulty: 'beginner',
+        description: 'Windows-like UI, perfect for switchers from Windows. Beautiful and polished.',
+        tags: ['Windows-like', 'Beginner', 'Beautiful', 'Modern'],
+        useCase: ['daily'],
+        website: 'https://zorin.com/os/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Garuda Linux',
+        base: 'arch',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'kde',
+        difficulty: 'some',
+        description: 'Performance-focused Arch derivative with stunning KDE rice. Gaming-ready out of the box. NVIDIA setup can be tricky.',
+        tags: ['Gaming', 'Performance', 'KDE', 'Beautiful'],
+        useCase: ['gaming', 'daily'],
+        website: 'https://garudalinux.org/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Fedora Kinoite',
+        base: 'fedora',
+        immutable: true,
+        release: 'semi',
+        desktop: 'kde',
+        difficulty: 'intermediate',
+        description: 'Immutable version of Fedora with KDE Plasma. Modern and stable.',
+        tags: ['Immutable', 'KDE', 'Fedora', 'Modern'],
+        useCase: ['daily', 'development'],
+        website: 'https://fedoraproject.org/kinoite/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'elementary OS',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'any',
+        difficulty: 'beginner',
+        description: 'macOS-like experience. Beautiful Pantheon desktop. Curated app store.',
+        tags: ['macOS-like', 'Beautiful', 'Curated', 'Simple'],
+        useCase: ['daily'],
+        website: 'https://elementary.io/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'CachyOS',
+        base: 'arch',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'any',
+        difficulty: 'intermediate',
+        description: 'Performance-optimized Arch with custom kernel. Multiple desktop options, gaming-focused. NVIDIA requires manual configuration.',
+        tags: ['Performance', 'Gaming', 'Arch', 'Optimized'],
+        useCase: ['gaming', 'daily'],
+        website: 'https://cachyos.org/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB or Limine (choice during install)'
+      },
+      {
+        name: 'Nobara',
+        base: 'fedora',
+        immutable: false,
+        release: 'semi',
+        desktop: 'any',
+        difficulty: 'beginner',
+        description: 'Fedora-based gaming distro by GloriousEggroll. Pre-configured for gaming with ProtonGE, codecs, and tweaks. Excellent NVIDIA support out of the box.',
+        tags: ['Gaming', 'Fedora', 'ProtonGE', 'NVIDIA-Ready'],
+        useCase: ['gaming', 'daily', 'creative'],
+        website: 'https://nobaraproject.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '16gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Bazzite',
+        base: 'fedora',
+        immutable: true,
+        release: 'semi',
+        desktop: 'any',
+        difficulty: 'intermediate',
+        description: 'Immutable Fedora Atomic gaming distro. Steam Deck experience on desktop. Incredible out-of-box gaming setup with perfect NVIDIA support.',
+        tags: ['Immutable', 'Gaming', 'Fedora', 'NVIDIA-Perfect'],
+        useCase: ['gaming'],
+        website: 'https://bazzite.gg/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '16gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Vanilla OS',
+        base: 'debian',
+        immutable: true,
+        release: 'stable',
+        desktop: 'gnome',
+        difficulty: 'some',
+        description: 'Immutable Ubuntu-based OS with on-demand mutability. Install packages from any distro with Apx.',
+        tags: ['Immutable', 'GNOME', 'Innovative', 'Multi-repo'],
+        useCase: ['daily', 'development'],
+        website: 'https://vanillaos.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'systemd-boot'
+      },
+      {
+        name: 'Tuxedo OS',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'kde',
+        difficulty: 'beginner',
+        description: 'Ubuntu-based with KDE Plasma. Made by Tuxedo Computers, excellent hardware support especially for laptops.',
+        tags: ['KDE', 'Laptop-optimized', 'User-friendly', 'Ubuntu'],
+        useCase: ['daily'],
+        website: 'https://www.tuxedocomputers.com/os',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Solus',
+        base: 'independent',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'any',
+        difficulty: 'some',
+        description: 'Independent distro with Budgie desktop. Curated rolling release focused on desktop experience.',
+        tags: ['Independent', 'Budgie', 'Curated', 'Rolling'],
+        useCase: ['daily'],
+        website: 'https://getsol.us/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'KDE neon',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'kde',
+        difficulty: 'some',
+        description: 'Ubuntu LTS base with latest KDE Plasma. Official KDE project for bleeding-edge KDE experience.',
+        tags: ['KDE', 'Latest', 'Ubuntu', 'Official'],
+        useCase: ['daily'],
+        website: 'https://neon.kde.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '8gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Chimera Linux',
+        base: 'independent',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'any',
+        difficulty: 'advanced',
+        description: 'Modern Linux with FreeBSD userland. No systemd, uses Dinit. Unique and experimental.',
+        tags: ['BSD', 'No-systemd', 'Experimental', 'Advanced'],
+        useCase: ['development'],
+        website: 'https://chimera-linux.org/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '4gb',
+        bootloader: 'rEFInd'
+      },
+      {
+        name: 'MX Linux',
+        base: 'debian',
+        immutable: false,
+        release: 'stable',
+        desktop: 'xfce',
+        difficulty: 'beginner',
+        description: 'Debian stable with custom tools. Consistently top-ranked on DistroWatch. Great for older hardware and laptops.',
+        tags: ['Lightweight', 'Stable', 'Tools', 'Popular'],
+        useCase: ['daily'],
+        website: 'https://mxlinux.org/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '4gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Regata OS',
+        base: 'fedora',
+        immutable: false,
+        release: 'semi',
+        desktop: 'gnome',
+        difficulty: 'beginner',
+        description: 'Brazilian Fedora-based gaming distro. Pre-configured with Steam, Lutris, and gaming tools.',
+        tags: ['Gaming', 'Fedora', 'Pre-configured', 'User-friendly'],
+        useCase: ['gaming', 'daily'],
+        website: 'https://regataos.com/',
+        gpuSupport: ['nvidia', 'amd', 'intel'],
+        laptopFriendly: false,
+        ramRecommended: '16gb',
+        bootloader: 'GRUB'
+      },
+      {
+        name: 'Void Linux',
+        base: 'independent',
+        immutable: false,
+        release: 'rolling',
+        desktop: 'minimal',
+        difficulty: 'advanced',
+        description: 'Independent rolling distro with runit init. Fast, stable, no systemd. XBPS package manager.',
+        tags: ['Independent', 'Runit', 'No-systemd', 'Minimal'],
+        useCase: ['development', 'daily'],
+        website: 'https://voidlinux.org/',
+        gpuSupport: ['amd', 'intel'],
+        laptopFriendly: true,
+        ramRecommended: '4gb',
+        bootloader: 'GRUB or rEFInd'
+      },
+      {
+        name: 'Qubes OS',
+        base: 'independent',
+        immutable: false,
+        release: 'stable',
+        desktop: 'any',
+        difficulty: 'advanced',
+        description: 'Security-focused OS using Xen virtualization. Compartmentalized workflows for maximum security.',
+        tags: ['Security', 'Xen', 'Privacy', 'Advanced'],
+        useCase: ['development'],
+        website: 'https://www.qubes-os.org/',
+        gpuSupport: ['intel'],
+        laptopFriendly: true,
+        ramRecommended: '16gb',
+        bootloader: 'GRUB'
+      }
+    ];
+
+    // State
+    let currentQuestion = 0;
+    let answers = {};
+    let currentUser = null;
+    let comments = {};
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      renderQuestion();
+      renderExplore();
+      renderWiki();
+      setupNavigation();
+      setupTooltips();
+      loadComments();
+    });
+
+    // Navigation
+    function setupNavigation() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const section = btn.dataset.section;
+          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          document.getElementById(section).classList.add('active');
+          btn.classList.add('active');
+        });
+      });
+    }
+
+    // Quiz
+    function renderQuestion() {
+      if (currentQuestion >= quizQuestions.length) {
+        showResults();
+        return;
+      }
+
+      const question = quizQuestions[currentQuestion];
+      const progress = ((currentQuestion) / quizQuestions.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+
+      const html = `
+        <div class="question-card">
+          <div class="question-number">Question ${currentQuestion + 1} of ${quizQuestions.length}</div>
+          <h2 class="question-text">${question.question}</h2>
+          <div class="options">
+            ${question.options.map((opt, idx) => `
+              <div class="option" data-value="${opt.value}" onclick="selectOption('${opt.value}')">
+                <div class="option-label">${opt.label}</div>
+                <div class="option-desc">${opt.desc}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="quiz-nav">
+            <button class="btn btn-secondary" onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>
+              ← Previous
+            </button>
+            <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>
+              ${currentQuestion === quizQuestions.length - 1 ? 'See Results' : 'Next'} →
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('quizContent').innerHTML = html;
+      
+      // Restore previous answer
+      if (answers[question.id]) {
+        selectOption(answers[question.id], false);
+      }
+
+      // Re-setup tooltips after render
+      setupTooltips();
+    }
+
+    function selectOption(value, advance = true) {
+      const question = quizQuestions[currentQuestion];
+      answers[question.id] = value;
+
+      document.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.dataset.value === value) {
+          opt.classList.add('selected');
+        }
+      });
+
+      document.getElementById('nextBtn').disabled = false;
+
+      if (advance && currentQuestion < quizQuestions.length - 1) {
+        setTimeout(() => nextQuestion(), 400);
+      }
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      renderQuestion();
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+      }
+    }
+
+    function showResults() {
+      const recommended = calculateRecommendation();
+      const alternatives = calculateAlternatives(recommended);
+      const gpu = answers[3];
+
+      // Check for NVIDIA compatibility warnings
+      let nvidiaWarning = '';
+      if (gpu === 'nvidia' && !recommended.gpuSupport.includes('nvidia')) {
+        nvidiaWarning = `
+          <div style="background: rgba(255, 0, 110, 0.15); border: 2px solid var(--accent-tertiary); border-radius: 12px; padding: 1.5rem; margin-top: 2rem;">
+            <h4 style="color: var(--accent-tertiary); margin-bottom: 0.5rem;">⚠️ NVIDIA GPU Notice</h4>
+            <p style="color: var(--text-secondary);">
+              This distro requires manual NVIDIA driver setup, which can be challenging. Consider alternatives like 
+              <strong style="color: var(--accent-primary);">Bazzite</strong>, 
+              <strong style="color: var(--accent-primary);">Nobara</strong>, or 
+              <strong style="color: var(--accent-primary);">Pop!_OS</strong> for hassle-free NVIDIA support.
+            </p>
+          </div>
+        `;
+      }
+
+      const html = `
+        <div class="result-card">
+          <h2 class="result-title">${recommended.name}</h2>
+          <p class="result-subtitle">${recommended.description}</p>
+          
+          <div class="result-details">
+            <div class="detail-item">
+              <div class="detail-label">Base</div>
+              <div class="detail-value">${capitalizeFirst(recommended.base)}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Type</div>
+              <div class="detail-value">${recommended.immutable ? 'Immutable' : 'Traditional'}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Release</div>
+              <div class="detail-value">${capitalizeFirst(recommended.release)}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Difficulty</div>
+              <div class="detail-value">${capitalizeFirst(recommended.difficulty)}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">GPU Support</div>
+              <div class="detail-value">${recommended.gpuSupport.map(g => capitalizeFirst(g)).join(', ')}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Recommended RAM</div>
+              <div class="detail-value">${recommended.ramRecommended.toUpperCase()}</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+            ${recommended.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+
+          ${nvidiaWarning}
+
+          <div style="margin-top: 2rem;">
+            <a href="${recommended.website}" target="_blank" class="btn btn-primary">Visit Website →</a>
+            <button class="btn btn-secondary" onclick="restartQuiz()" style="margin-left: 1rem;">Start Over</button>
+          </div>
+        </div>
+
+        <div class="alternatives">
+          <h3>You might also like these:</h3>
+          <div class="alt-grid">
+            ${alternatives.map(distro => `
+              <div class="alt-card" onclick="showDistroModal('${distro.name}')">
+                <h4>${distro.name}</h4>
+                <p>${distro.description}</p>
+                <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  ${distro.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('quizContent').innerHTML = html;
+      document.getElementById('progressFill').style.width = '100%';
+    }
+
+    function calculateRecommendation() {
+      const experience = answers[1];
+      const deviceType = answers[2];
+      const gpu = answers[3];
+      const ram = answers[4];
+      const wantsImmutable = answers[5];
+      const base = answers[6];
+      const desktop = answers[7];
+      const release = answers[8];
+      const useCase = answers[9];
+
+      let scores = {};
+      
+      distros.forEach(distro => {
+        let score = 0;
+
+        // Experience level matching
+        if (experience === 'beginner' && distro.difficulty === 'beginner') score += 30;
+        if (experience === 'some' && (distro.difficulty === 'beginner' || distro.difficulty === 'some')) score += 25;
+        if (experience === 'intermediate' && distro.difficulty !== 'beginner') score += 20;
+        if (experience === 'advanced' && distro.difficulty === 'advanced') score += 25;
+
+        // Hardware type - strongly favor laptop-friendly distros for laptop users
+        if (deviceType === 'laptop' && distro.laptopFriendly) score += 35;
+        if (deviceType === 'laptop' && !distro.laptopFriendly) score -= 20;
+        if (deviceType === 'desktop' && !distro.laptopFriendly) score += 10;
+
+        // GPU support - CRITICAL for NVIDIA users
+        if (gpu === 'nvidia') {
+          if (distro.gpuSupport.includes('nvidia')) {
+            score += 50; // Big bonus for NVIDIA support
+            // Extra bonus for distros known for excellent NVIDIA support
+            if (distro.name === 'Bazzite' || distro.name === 'Nobara' || distro.name === 'Pop!_OS') {
+              score += 30;
+            }
+          } else {
+            score -= 40; // Heavy penalty for lack of NVIDIA support
+          }
+        }
+        if (gpu === 'amd' && distro.gpuSupport.includes('amd')) score += 20;
+        if (gpu === 'intel' && distro.gpuSupport.includes('intel')) score += 15;
+
+        // RAM-based recommendations
+        if (ram === '4gb') {
+          if (distro.ramRecommended === '4gb') score += 30;
+          if (distro.ramRecommended === '16gb') score -= 25; // Penalize heavy distros
+        }
+        if (ram === '8gb') {
+          if (distro.ramRecommended === '8gb') score += 20;
+          if (distro.ramRecommended === '4gb') score += 10; // Lightweight is still good
+        }
+        if (ram === '16gb') {
+          if (distro.ramRecommended === '16gb') score += 15;
+          // Any distro works with 16GB
+        }
+
+        // Immutable preference
+        if (wantsImmutable === 'yes' && distro.immutable) score += 40;
+        if (wantsImmutable === 'no' && !distro.immutable) score += 20;
+        if (wantsImmutable === 'unsure') score += 10;
+
+        // Base matching
+        if (base === distro.base || base === 'any') score += 15;
+
+        // Desktop matching
+        if (desktop === 'any' || distro.desktop === 'any' || desktop === distro.desktop) score += 10;
+
+        // Release type
+        if (release === distro.release || release === 'any' || distro.release === 'semi') score += 15;
+
+        // Use case
+        if (distro.useCase.includes(useCase)) score += 20;
+
+        scores[distro.name] = score;
+      });
+
+      const topDistro = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+      return distros.find(d => d.name === topDistro);
+    }
+
+    function calculateAlternatives(recommended) {
+      return distros
+        .filter(d => d.name !== recommended.name)
+        .filter(d => d.base === recommended.base || d.difficulty === recommended.difficulty)
+        .slice(0, 3);
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      answers = {};
+      renderQuestion();
+    }
+
+    // Explore
+    function renderExplore() {
+      const html = distros.map(distro => `
+        <div class="distro-card" onclick="showDistroModal('${distro.name}')">
+          <h3>${distro.name}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">${distro.description}</p>
+          <div class="distro-tags">
+            ${distro.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('distroGrid').innerHTML = html;
+    }
+
+    // Wiki
+    function renderWiki() {
+      const html = Object.keys(wikiTerms).map(key => {
+        const term = wikiTerms[key];
+        return `
+          <div class="distro-card">
+            <h3>${term.title}</h3>
+            <p style="color: var(--text-secondary);">${term.description}</p>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('wikiGrid').innerHTML = html;
+    }
+
+    // Tooltips
+    function setupTooltips() {
+      document.querySelectorAll('.wiki-term').forEach(term => {
+        term.addEventListener('mouseenter', (e) => showTooltip(e, term.dataset.term));
+        term.addEventListener('mouseleave', hideTooltip);
+      });
+    }
+
+    function showTooltip(e, termKey) {
+      const tooltip = document.getElementById('tooltip');
+      const term = wikiTerms[termKey];
+      
+      if (!term) return;
+
+      tooltip.innerHTML = `
+        <h4>${term.title}</h4>
+        <p>${term.description}</p>
+      `;
+
+      tooltip.style.display = 'block';
+      
+      const rect = e.target.getBoundingClientRect();
+      tooltip.style.left = rect.left + 'px';
+      tooltip.style.top = (rect.bottom + 10) + 'px';
+    }
+
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Modal
+    function showDistroModal(distroName) {
+      const distro = distros.find(d => d.name === distroName);
+      if (!distro) return;
+
+      const distroComments = comments[distroName] || [];
+
+      // Add wiki tooltips to bootloader text
+      let bootloaderDisplay = distro.bootloader || 'GRUB';
+      bootloaderDisplay = bootloaderDisplay
+        .replace(/GRUB/g, '<span class="wiki-term" data-term="grub">GRUB</span>')
+        .replace(/systemd-boot/g, '<span class="wiki-term" data-term="systemdBoot">systemd-boot</span>')
+        .replace(/Limine/g, '<span class="wiki-term" data-term="limine">Limine</span>')
+        .replace(/rEFInd/g, '<span class="wiki-term" data-term="refind">rEFInd</span>');
+
+      const html = `
+        <h2 style="color: var(--accent-primary); margin-bottom: 1rem;">${distro.name}</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">${distro.description}</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+          <div class="detail-item">
+            <div class="detail-label">Base</div>
+            <div class="detail-value">${capitalizeFirst(distro.base)}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Type</div>
+            <div class="detail-value">${distro.immutable ? 'Immutable' : 'Traditional'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Release</div>
+            <div class="detail-value">${capitalizeFirst(distro.release)}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Difficulty</div>
+            <div class="detail-value">${capitalizeFirst(distro.difficulty)}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">GPU Support</div>
+            <div class="detail-value">${distro.gpuSupport.map(g => capitalizeFirst(g)).join(', ')}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Bootloader</div>
+            <div class="detail-value" style="font-size: 0.95rem;">${bootloaderDisplay}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+          ${distro.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}
+        </div>
+
+        <a href="${distro.website}" target="_blank" class="btn btn-primary" style="margin-bottom: 2rem;">Visit Official Website →</a>
+
+        <div class="comments-section">
+          <h3 style="margin-bottom: 1rem;">Community Comments</h3>
+          
+          ${currentUser ? `
+            <div class="comment-form">
+              <textarea id="commentInput" placeholder="Share your experience with ${distro.name}..."></textarea>
+              <button class="btn btn-primary" onclick="submitComment('${distroName}')" style="margin-top: 1rem;">Post Comment</button>
+            </div>
+          ` : `
+            <p style="color: var(--text-secondary); padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+              Sign in with Google to leave a comment
+            </p>
+          `}
+
+          <div style="margin-top: 2rem;">
+            ${distroComments.length === 0 ? `
+              <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No comments yet. Be the first!</p>
+            ` : distroComments.map(comment => `
+              <div class="comment">
+                <div class="comment-header">
+                  <span class="comment-author">${comment.author}</span>
+                  <span class="comment-date">${comment.date}</span>
+                </div>
+                <p class="comment-text">${comment.text}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('distroModal').classList.add('active');
+      
+      // Re-setup tooltips for the bootloader terms in the modal
+      setupTooltips();
+    }
+
+    function closeModal() {
+      document.getElementById('distroModal').classList.remove('active');
+    }
+
+    // Comments
+    function loadComments() {
+      const stored = localStorage.getItem('distroComments');
+      if (stored) {
+        comments = JSON.parse(stored);
+      }
+    }
+
+    function saveComments() {
+      localStorage.setItem('distroComments', JSON.stringify(comments));
+    }
+
+    function submitComment(distroName) {
+      const input = document.getElementById('commentInput');
+      const text = input.value.trim();
+      
+      if (!text || !currentUser) return;
+
+      if (!comments[distroName]) {
+        comments[distroName] = [];
+      }
+
+      comments[distroName].unshift({
+        author: currentUser.name,
+        text: text,
+        date: new Date().toLocaleDateString()
+      });
+
+      saveComments();
+      showDistroModal(distroName);
+    }
+
+    // Auth (Mock - in production use real Google OAuth)
+    function initAuth() {
+      const stored = localStorage.getItem('mockUser');
+      if (stored) {
+        currentUser = JSON.parse(stored);
+        renderAuth();
+      } else {
+        renderAuth();
+      }
+    }
+
+    function renderAuth() {
+      const container = document.getElementById('authContainer');
+      
+      if (currentUser) {
+        container.innerHTML = `
+          <div class="user-info">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=00ff88&color=0a0e27" alt="Avatar" class="user-avatar">
+            <span style="color: var(--text-primary); font-weight: 600;">${currentUser.name}</span>
+            <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <button class="google-btn" onclick="mockGoogleLogin()">
+            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+              <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+              <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+              <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/>
+              <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
+            </svg>
+            Sign in with Google
+          </button>
+        `;
+      }
+    }
+
+    function mockGoogleLogin() {
+      // Mock login - in production, use real Google OAuth
+      const name = prompt('Enter your name (this is a demo):');
+      if (name) {
+        currentUser = { name: name };
+        localStorage.setItem('mockUser', JSON.stringify(currentUser));
+        renderAuth();
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('mockUser');
+      renderAuth();
+    }
+
+    // Utility
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Close modal on click outside
+    document.getElementById('distroModal').addEventListener('click', (e) => {
+      if (e.target.id === 'distroModal') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
