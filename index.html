@@ -116,6 +116,32 @@
       to { opacity: 1; }
     }
 
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      margin-top: 4rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+
+    footer p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-bottom: 1px dotted var(--accent-primary);
+    }
+
+    footer a:hover {
+      color: var(--accent-secondary);
+      border-bottom-color: var(--accent-secondary);
+    }
+
     /* Navigation */
     nav {
       display: flex;
@@ -170,6 +196,7 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 3rem 2rem;
+      min-height: calc(100vh - 400px);
     }
 
     /* Sections */
@@ -789,6 +816,14 @@
     </section>
   </div>
 
+  <!-- Footer -->
+  <footer>
+    <p>
+      This project is <a href="https://github.com/SusieeTheFemboy/distro-picker" target="_blank" rel="noopener">open source</a> • 
+      Made with 💚 for the Linux community
+    </p>
+  </footer>
+
   <!-- Tooltip -->
   <div class="tooltip" id="tooltip"></div>
 
@@ -1393,13 +1428,24 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      initAuth();
-      renderQuestion();
-      renderExplore();
-      renderWiki();
-      setupNavigation();
-      setupTooltips();
-      loadComments();
+      try {
+        console.log('Initializing DistroMatch...');
+        console.log('Total distros:', distros.length);
+        console.log('Total questions:', quizQuestions.length);
+        
+        initAuth();
+        renderQuestion();
+        renderExplore();
+        renderWiki();
+        setupNavigation();
+        setupTooltips();
+        loadComments();
+        
+        console.log('DistroMatch initialized successfully!');
+      } catch (error) {
+        console.error('Initialization error:', error);
+        document.body.innerHTML = '<div style="padding: 2rem; color: red;">Error initializing app: ' + error.message + '</div>';
+      }
     });
 
     // Navigation
@@ -1417,47 +1463,52 @@
 
     // Quiz
     function renderQuestion() {
-      if (currentQuestion >= quizQuestions.length) {
-        showResults();
-        return;
-      }
+      try {
+        if (currentQuestion >= quizQuestions.length) {
+          showResults();
+          return;
+        }
 
-      const question = quizQuestions[currentQuestion];
-      const progress = ((currentQuestion) / quizQuestions.length) * 100;
-      document.getElementById('progressFill').style.width = progress + '%';
+        const question = quizQuestions[currentQuestion];
+        const progress = ((currentQuestion) / quizQuestions.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
 
-      const html = `
-        <div class="question-card">
-          <div class="question-number">Question ${currentQuestion + 1} of ${quizQuestions.length}</div>
-          <h2 class="question-text">${question.question}</h2>
-          <div class="options">
-            ${question.options.map((opt, idx) => `
-              <div class="option" data-value="${opt.value}" onclick="selectOption('${opt.value}')">
-                <div class="option-label">${opt.label}</div>
-                <div class="option-desc">${opt.desc}</div>
-              </div>
-            `).join('')}
+        const html = `
+          <div class="question-card">
+            <div class="question-number">Question ${currentQuestion + 1} of ${quizQuestions.length}</div>
+            <h2 class="question-text">${question.question}</h2>
+            <div class="options">
+              ${question.options.map((opt, idx) => `
+                <div class="option" data-value="${opt.value}" onclick="selectOption('${opt.value}')">
+                  <div class="option-label">${opt.label}</div>
+                  <div class="option-desc">${opt.desc}</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="quiz-nav">
+              <button class="btn btn-secondary" onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>
+                ← Previous
+              </button>
+              <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>
+                ${currentQuestion === quizQuestions.length - 1 ? 'See Results' : 'Next'} →
+              </button>
+            </div>
           </div>
-          <div class="quiz-nav">
-            <button class="btn btn-secondary" onclick="previousQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>
-              ← Previous
-            </button>
-            <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>
-              ${currentQuestion === quizQuestions.length - 1 ? 'See Results' : 'Next'} →
-            </button>
-          </div>
-        </div>
-      `;
+        `;
 
-      document.getElementById('quizContent').innerHTML = html;
-      
-      // Restore previous answer
-      if (answers[question.id]) {
-        selectOption(answers[question.id], false);
+        document.getElementById('quizContent').innerHTML = html;
+        
+        // Restore previous answer
+        if (answers[question.id]) {
+          selectOption(answers[question.id], false);
+        }
+
+        // Re-setup tooltips after render
+        setupTooltips();
+      } catch (error) {
+        console.error('Error rendering question:', error);
+        document.getElementById('quizContent').innerHTML = '<div style="padding: 2rem; color: red;">Error loading question. Please refresh the page.</div>';
       }
-
-      // Re-setup tooltips after render
-      setupTooltips();
     }
 
     function selectOption(value, advance = true) {
@@ -1917,7 +1968,6 @@
         closeModal();
       }
     });
-
   </script>
 </body>
 </html>
