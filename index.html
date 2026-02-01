@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DistroMatch - Find Your Perfect Linux Distribution</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * {
       margin: 0;
@@ -2321,8 +2322,9 @@
       showDistroModal(distroName);
     }
 
-    // Auth (Mock - in production use real Google OAuth)
+    // Auth - Real Google OAuth
     const ADMIN_EMAIL = 'wegetarian@gmail.com';
+    const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE'; // Replace with your actual client ID
     
     function initAuth() {
       const stored = localStorage.getItem('mockUser');
@@ -2332,39 +2334,23 @@
       } else {
         renderAuth();
       }
-    }
-
-    function renderAuth() {
-      const container = document.getElementById('authContainer');
       
-      if (currentUser) {
-        container.innerHTML = `
-          <div class="user-info">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27" alt="Avatar" class="user-avatar">
-            <span style="color: var(--text-primary); font-weight: 600;">${currentUser.username}</span>
-            ${currentUser.email === ADMIN_EMAIL ? '<span style="color: var(--accent-tertiary); margin-left: 0.5rem; font-size: 0.8rem; font-weight: 600;">ADMIN</span>' : ''}
-            <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <button class="google-btn" onclick="mockGoogleLogin()">
-            <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-              <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
-              <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
-              <path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/>
-              <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
-            </svg>
-            Sign in with Google
-          </button>
-        `;
+      // Initialize Google Sign-In
+      if (window.google) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCallback
+        });
       }
     }
 
-    function mockGoogleLogin() {
-      // Mock login - in production, use real Google OAuth
-      const email = prompt('Enter your email (this is a demo):');
-      if (!email) return;
+    function handleGoogleCallback(response) {
+      // Decode the JWT token to get user info
+      const userData = parseJwt(response.credential);
+      
+      const email = userData.email;
+      const name = userData.name;
+      const picture = userData.picture;
       
       // Check if user already has a username
       const existingUsers = JSON.parse(localStorage.getItem('allUsers') || '{}');
@@ -2376,12 +2362,17 @@
         renderAuth();
       } else {
         // New user - ask for username
-        const username = prompt('Choose a username:');
-        if (!username) return;
+        const username = prompt(`Welcome ${name}! Choose a username:`);
+        if (!username) {
+          alert('Username is required!');
+          return;
+        }
         
         currentUser = { 
           email: email,
           username: username,
+          name: name,
+          picture: picture,
           createdAt: new Date().toISOString()
         };
         
@@ -2393,9 +2384,54 @@
       }
     }
 
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    function renderAuth() {
+      const container = document.getElementById('authContainer');
+      
+      if (currentUser) {
+        const avatarUrl = currentUser.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
+        container.innerHTML = `
+          <div class="user-info">
+            <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
+            <span style="color: var(--text-primary); font-weight: 600;">${currentUser.username}</span>
+            ${currentUser.email === ADMIN_EMAIL ? '<span style="color: var(--accent-tertiary); margin-left: 0.5rem; font-size: 0.8rem; font-weight: 600;">ADMIN</span>' : ''}
+            <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div id="googleSignInButton"></div>
+        `;
+        
+        // Render Google Sign-In button
+        if (window.google) {
+          google.accounts.id.renderButton(
+            document.getElementById('googleSignInButton'),
+            { 
+              theme: 'filled_blue',
+              size: 'large',
+              text: 'signin_with',
+              shape: 'rectangular'
+            }
+          );
+        }
+      }
+    }
+
     function logout() {
       currentUser = null;
       localStorage.removeItem('mockUser');
+      if (window.google) {
+        google.accounts.id.disableAutoSelect();
+      }
       renderAuth();
     }
 
