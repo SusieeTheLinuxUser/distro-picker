@@ -788,6 +788,8 @@
     <button class="nav-btn active" data-section="quiz">Quiz</button>
     <button class="nav-btn" data-section="explore">Explore Distros</button>
     <button class="nav-btn" data-section="wiki">Wiki</button>
+    <button class="nav-btn" data-section="install">How to Install</button>
+    <button class="nav-btn" data-section="leaderboard">Leaderboard</button>
     <div style="flex-grow: 1"></div>
     <div id="authContainer"></div>
   </nav>
@@ -813,6 +815,109 @@
     <section id="wiki" class="section">
       <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">Linux Terms & Concepts</h2>
       <div class="distro-grid" id="wikiGrid"></div>
+    </section>
+
+    <!-- How to Install Section -->
+    <section id="install" class="section">
+      <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">📀 How to Install Linux</h2>
+      
+      <div style="max-width: 900px; margin: 0 auto;">
+        <!-- Step 1: Ventoy -->
+        <div class="distro-card" style="margin-bottom: 2rem; cursor: default;">
+          <h3 style="color: var(--accent-primary); font-size: 2rem; margin-bottom: 1rem;">Step 1: Create Bootable USB with Ventoy</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8;">
+            Ventoy is the easiest way to create a bootable USB. You can copy multiple ISO files to the same USB and boot from any of them!
+          </p>
+          
+          <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--accent-primary);">
+            <h4 style="color: var(--accent-primary); margin-bottom: 1rem;">📋 Instructions:</h4>
+            <ol style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+              <li><strong>Download Ventoy:</strong> Visit <a href="https://www.ventoy.net" target="_blank" style="color: var(--accent-primary);">ventoy.net</a> and download for Windows, Linux, or Mac</li>
+              <li><strong>Install to USB:</strong> Run Ventoy2Disk and select your USB drive (⚠️ This will erase all data!)</li>
+              <li><strong>Copy ISO files:</strong> After installation, simply copy your Linux .iso files to the USB drive like normal files</li>
+              <li><strong>Boot:</strong> Restart your computer and boot from USB - Ventoy will show a menu of all ISO files!</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Step 2: Choose Edition -->
+        <div class="distro-card" style="margin-bottom: 2rem; cursor: default;">
+          <h3 style="color: var(--accent-secondary); font-size: 2rem; margin-bottom: 1rem;">Step 2: Choose Desktop Environment</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8;">
+            Most distros offer different "flavors" with different desktop environments. Here's what they mean:
+          </p>
+          
+          <div style="display: grid; gap: 1rem;">
+            <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
+              <strong style="color: var(--accent-primary);">🖥️ GNOME:</strong> 
+              <span style="color: var(--text-secondary);"> Modern, clean interface. Great for touchpads. Used by Ubuntu, Fedora.</span>
+            </div>
+            <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
+              <strong style="color: var(--accent-secondary);">🎨 KDE Plasma:</strong> 
+              <span style="color: var(--text-secondary);"> Highly customizable, Windows-like. Beautiful and feature-rich.</span>
+            </div>
+            <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
+              <strong style="color: #87cf3e);">🪶 XFCE/MATE:</strong> 
+              <span style="color: var(--text-secondary);"> Lightweight, traditional. Perfect for older computers.</span>
+            </div>
+            <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
+              <strong style="color: #3689e6;">🍃 Cinnamon:</strong> 
+              <span style="color: var(--text-secondary);"> Windows-like, beginner-friendly. Default for Linux Mint.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Disable Secure Boot -->
+        <div class="distro-card" style="margin-bottom: 2rem; cursor: default;">
+          <h3 style="color: var(--accent-tertiary); font-size: 2rem; margin-bottom: 1rem;">Step 3: Disable Secure Boot (if needed)</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8;">
+            Some distros require Secure Boot to be disabled. Here's how:
+          </p>
+          
+          <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--accent-tertiary);">
+            <ol style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+              <li><strong>Enter BIOS/UEFI:</strong> Restart and press F2, F10, F12, or DEL during boot (depends on manufacturer)</li>
+              <li><strong>Find Security Tab:</strong> Look for "Secure Boot" option</li>
+              <li><strong>Disable it:</strong> Change from "Enabled" to "Disabled"</li>
+              <li><strong>Save & Exit:</strong> Usually F10 to save and restart</li>
+            </ol>
+            <p style="color: var(--text-secondary); margin-top: 1rem; font-style: italic;">
+              ⚠️ Note: Ubuntu, Fedora, and some others work WITH Secure Boot enabled. Check your distro's documentation!
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 4: Boot from USB -->
+        <div class="distro-card" style="cursor: default;">
+          <h3 style="color: var(--accent-primary); font-size: 2rem; margin-bottom: 1rem;">Step 4: Boot from USB & Install</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8;">
+            Final step - let's boot into the installer!
+          </p>
+          
+          <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--accent-primary);">
+            <ol style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+              <li><strong>Insert USB:</strong> Plug in your Ventoy USB drive</li>
+              <li><strong>Restart computer:</strong> As it boots, press F12, F9, or ESC (depends on manufacturer) to open boot menu</li>
+              <li><strong>Select USB:</strong> Choose your USB drive from the list</li>
+              <li><strong>Choose ISO:</strong> Ventoy will show a menu - select your Linux distro</li>
+              <li><strong>Follow installer:</strong> Most installers are very user-friendly. Choose language, timezone, and create your user account</li>
+              <li><strong>Dual Boot (optional):</strong> If keeping Windows, the installer will detect it and let you install alongside</li>
+            </ol>
+            <p style="color: var(--accent-primary); margin-top: 1rem; font-weight: 600;">
+              🎉 That's it! Welcome to Linux!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section id="leaderboard" class="section">
+      <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">🏆 Community Leaderboard</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Vote for your favorite distro! You can vote once every 6 months. Leaderboard resets every 6 months.
+      </p>
+      <div id="leaderboardContent"></div>
     </section>
   </div>
 
@@ -1452,6 +1557,8 @@
     let answers = {};
     let currentUser = null;
     let comments = {};
+    let votes = {};
+    let lastVote = null;
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -1464,9 +1571,11 @@
         renderQuestion();
         renderExplore();
         renderWiki();
+        renderLeaderboard();
         setupNavigation();
         setupTooltips();
         loadComments();
+        loadVotes();
         
         console.log('DistroMatch initialized successfully!');
       } catch (error) {
@@ -1474,6 +1583,158 @@
         document.body.innerHTML = '<div style="padding: 2rem; color: red;">Error initializing app: ' + error.message + '</div>';
       }
     });
+
+    // Leaderboard
+    function loadVotes() {
+      const stored = localStorage.getItem('distroVotes');
+      if (stored) {
+        votes = JSON.parse(stored);
+      }
+      
+      const storedLastVote = localStorage.getItem('lastVote');
+      if (storedLastVote) {
+        lastVote = JSON.parse(storedLastVote);
+      }
+    }
+
+    function saveVotes() {
+      localStorage.setItem('distroVotes', JSON.stringify(votes));
+    }
+
+    function canVote() {
+      if (!currentUser) return false;
+      if (!lastVote) return true;
+      
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const lastVoteDate = new Date(lastVote.date);
+      return lastVoteDate < sixMonthsAgo;
+    }
+
+    function voteForDistro(distroName) {
+      if (!currentUser) {
+        alert('Please sign in to vote!');
+        return;
+      }
+      
+      if (!canVote()) {
+        const lastVoteDate = new Date(lastVote.date);
+        const nextVoteDate = new Date(lastVoteDate);
+        nextVoteDate.setMonth(nextVoteDate.getMonth() + 6);
+        alert(`You can vote again on ${nextVoteDate.toLocaleDateString()}. Your current vote is for ${lastVote.distro}.`);
+        return;
+      }
+      
+      // Remove old vote if exists
+      if (lastVote && votes[lastVote.distro]) {
+        votes[lastVote.distro] = Math.max(0, (votes[lastVote.distro] || 0) - 1);
+      }
+      
+      // Add new vote
+      votes[distroName] = (votes[distroName] || 0) + 1;
+      
+      lastVote = {
+        distro: distroName,
+        date: new Date().toISOString(),
+        user: currentUser.email
+      };
+      
+      localStorage.setItem('lastVote', JSON.stringify(lastVote));
+      saveVotes();
+      renderLeaderboard();
+      
+      alert(`✅ Voted for ${distroName}! You can change your vote in 6 months.`);
+    }
+
+    function renderLeaderboard() {
+      // Sort distros by votes
+      const sortedDistros = distros
+        .map(d => ({ name: d.name, votes: votes[d.name] || 0, color: d.brandColor }))
+        .sort((a, b) => b.votes - a.votes);
+      
+      const totalVotes = sortedDistros.reduce((sum, d) => sum + d.votes, 0);
+      const userHasVoted = lastVote !== null;
+      const userCanVote = canVote();
+      
+      let html = '';
+      
+      // User voting status
+      if (currentUser) {
+        if (userHasVoted && !userCanVote) {
+          const nextVoteDate = new Date(lastVote.date);
+          nextVoteDate.setMonth(nextVoteDate.getMonth() + 6);
+          html += `
+            <div style="background: var(--bg-card); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+              <p style="color: var(--text-primary); text-align: center;">
+                ✅ You voted for <strong style="color: var(--accent-primary);">${lastVote.distro}</strong>
+                <br>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Next vote available: ${nextVoteDate.toLocaleDateString()}</span>
+              </p>
+            </div>
+          `;
+        } else {
+          html += `
+            <div style="background: var(--bg-card); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+              <p style="color: var(--accent-primary); text-align: center; font-weight: 600;">
+                🗳️ You can vote now! Choose your favorite distro below.
+              </p>
+            </div>
+          `;
+        }
+      } else {
+        html += `
+          <div style="background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            <p style="color: var(--text-secondary); text-align: center;">
+              Sign in to vote for your favorite distro!
+            </p>
+          </div>
+        `;
+      }
+      
+      // Leaderboard table
+      html += `
+        <div style="max-width: 800px; margin: 0 auto;">
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem;">
+            <div style="display: grid; gap: 1rem;">
+              ${sortedDistros.map((distro, index) => {
+                const percentage = totalVotes > 0 ? (distro.votes / totalVotes * 100).toFixed(1) : 0;
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                
+                return `
+                  <div style="background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; border-left: 4px solid ${distro.color}; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; bottom: 0; width: ${percentage}%; background: ${distro.color}15; transition: width 0.5s ease;"></div>
+                    <div style="position: relative; display: flex; justify-content: space-between; align-items: center;">
+                      <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; min-width: 2rem;">#${index + 1}</span>
+                        ${medal ? `<span style="font-size: 1.5rem;">${medal}</span>` : ''}
+                        <span style="font-size: 1.1rem; font-weight: 600; color: ${distro.color};">${distro.name}</span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div style="text-align: right;">
+                          <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">${distro.votes}</div>
+                          <div style="font-size: 0.85rem; color: var(--text-secondary);">${percentage}%</div>
+                        </div>
+                        ${currentUser && userCanVote ? `
+                          <button onclick="voteForDistro('${distro.name}')" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Vote</button>
+                        ` : ''}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+              <p>Total Votes: <strong style="color: var(--accent-primary);">${totalVotes}</strong></p>
+              <p style="font-size: 0.85rem; margin-top: 0.5rem;">Leaderboard resets every 6 months</p>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('leaderboardContent').innerHTML = html;
+    }
 
     // Navigation
     function setupNavigation() {
@@ -1989,15 +2250,20 @@
           <div style="margin-top: 2rem;">
             ${distroComments.length === 0 ? `
               <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No comments yet. Be the first!</p>
-            ` : distroComments.map(comment => `
+            ` : distroComments.map(comment => {
+              const canDelete = currentUser && (currentUser.email === comment.email || currentUser.email === ADMIN_EMAIL);
+              return `
               <div class="comment">
                 <div class="comment-header">
-                  <span class="comment-author">${comment.author}</span>
-                  <span class="comment-date">${comment.date}</span>
+                  <span class="comment-author">${comment.username || comment.author || 'Anonymous'}</span>
+                  <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span class="comment-date">${comment.date}</span>
+                    ${canDelete ? `<button onclick="deleteComment('${distroName}', ${comment.id})" style="background: var(--accent-tertiary); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Outfit', sans-serif;">Delete</button>` : ''}
+                  </div>
                 </div>
                 <p class="comment-text">${comment.text}</p>
               </div>
-            `).join('')}
+            `}).join('')}
           </div>
         </div>
       `;
@@ -2036,16 +2302,28 @@
       }
 
       comments[distroName].unshift({
-        author: currentUser.name,
+        username: currentUser.username,
+        email: currentUser.email,
         text: text,
-        date: new Date().toLocaleDateString()
+        date: new Date().toLocaleDateString(),
+        id: Date.now() + Math.random() // Unique ID for deletion
       });
 
       saveComments();
       showDistroModal(distroName);
     }
 
+    function deleteComment(distroName, commentId) {
+      if (!comments[distroName]) return;
+      
+      comments[distroName] = comments[distroName].filter(c => c.id !== commentId);
+      saveComments();
+      showDistroModal(distroName);
+    }
+
     // Auth (Mock - in production use real Google OAuth)
+    const ADMIN_EMAIL = 'wegetarian@gmail.com';
+    
     function initAuth() {
       const stored = localStorage.getItem('mockUser');
       if (stored) {
@@ -2062,8 +2340,9 @@
       if (currentUser) {
         container.innerHTML = `
           <div class="user-info">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=00ff88&color=0a0e27" alt="Avatar" class="user-avatar">
-            <span style="color: var(--text-primary); font-weight: 600;">${currentUser.name}</span>
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27" alt="Avatar" class="user-avatar">
+            <span style="color: var(--text-primary); font-weight: 600;">${currentUser.username}</span>
+            ${currentUser.email === ADMIN_EMAIL ? '<span style="color: var(--accent-tertiary); margin-left: 0.5rem; font-size: 0.8rem; font-weight: 600;">ADMIN</span>' : ''}
             <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
           </div>
         `;
@@ -2084,9 +2363,31 @@
 
     function mockGoogleLogin() {
       // Mock login - in production, use real Google OAuth
-      const name = prompt('Enter your name (this is a demo):');
-      if (name) {
-        currentUser = { name: name };
+      const email = prompt('Enter your email (this is a demo):');
+      if (!email) return;
+      
+      // Check if user already has a username
+      const existingUsers = JSON.parse(localStorage.getItem('allUsers') || '{}');
+      
+      if (existingUsers[email]) {
+        // Returning user
+        currentUser = existingUsers[email];
+        localStorage.setItem('mockUser', JSON.stringify(currentUser));
+        renderAuth();
+      } else {
+        // New user - ask for username
+        const username = prompt('Choose a username:');
+        if (!username) return;
+        
+        currentUser = { 
+          email: email,
+          username: username,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Save to all users
+        existingUsers[email] = currentUser;
+        localStorage.setItem('allUsers', JSON.stringify(existingUsers));
         localStorage.setItem('mockUser', JSON.stringify(currentUser));
         renderAuth();
       }
