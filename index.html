@@ -25,7 +25,7 @@
   </script>
 
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     * {
       margin: 0;
@@ -985,6 +985,23 @@
     </div>
   </div>
 
+  <!-- Modal for Login / Sign Up -->
+  <div class="modal" id="authModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+      <h2 id="authTitle" style="color: var(--accent-primary); margin-bottom: 1.5rem;">Log In</h2>
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <input id="authUsername" type="text" placeholder="Username" autocomplete="username" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log In</button>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <a href="#" id="authToggleLink" onclick="toggleAuthMode(); return false;" style="color: var(--accent-secondary);">Need an account? Sign up</a>
+          <a href="#" onclick="alert('Skill Issue 💀 There is no email on file, so there is no way to send a reset link. Pick a password you\'ll remember next time, or make a new account.'); return false;" style="color: var(--text-secondary);">Forgot password?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Data
     const wikiTerms = {
@@ -1597,31 +1614,35 @@
       }
     ];
 
+    // Supabase
+    const supabaseClient = supabase.createClient(
+      'https://wyhsdixvfnemobdvwiai.supabase.co',
+      'sb_publishable_z11dIXZaiySkuME6RvRyTQ_PaasAaoa'
+    );
+
     // State
     let currentQuestion = 0;
     let answers = {};
     let currentUser = null;
-    let comments = {};
     let votes = {};
     let lastVote = null;
 
     // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       try {
         console.log('Initializing DistroMatch...');
         console.log('Total distros:', distros.length);
         console.log('Total questions:', quizQuestions.length);
-        
-        initAuth();
+
+        await initAuth();
         renderQuestion();
         renderExplore();
         renderWiki();
+        await loadVotes();
         renderLeaderboard();
         setupNavigation();
         setupTooltips();
-        loadComments();
-        loadVotes();
-        
+
         console.log('DistroMatch initialized successfully!');
       } catch (error) {
         console.error('Initialization error:', error);
@@ -1630,20 +1651,16 @@
     });
 
     // Leaderboard
-    function loadVotes() {
-      const stored = localStorage.getItem('distroVotes');
-      if (stored) {
-        votes = JSON.parse(stored);
-      }
-      
-      const storedLastVote = localStorage.getItem('lastVote');
-      if (storedLastVote) {
-        lastVote = JSON.parse(storedLastVote);
-      }
-    }
-
-    function saveVotes() {
-      localStorage.setItem('distroVotes', JSON.stringify(votes));
+    async function loadVotes() {
+      const { data } = await supabaseClient.from('votes').select('*');
+      votes = {};
+      lastVote = null;
+      (data || []).forEach(row => {
+        votes[row.distro] = (votes[row.distro] || 0) + 1;
+        if (currentUser && row.user_id === currentUser.id) {
+          lastVote = { distro: row.distro, date: row.voted_at };
+        }
+      });
     }
 
     function canVote() {
@@ -1657,12 +1674,12 @@
       return lastVoteDate < sixMonthsAgo;
     }
 
-    function voteForDistro(distroName) {
+    async function voteForDistro(distroName) {
       if (!currentUser) {
         alert('Please sign in to vote!');
         return;
       }
-      
+
       if (!canVote()) {
         const lastVoteDate = new Date(lastVote.date);
         const nextVoteDate = new Date(lastVoteDate);
@@ -1670,25 +1687,21 @@
         alert(`You can vote again on ${nextVoteDate.toLocaleDateString()}. Your current vote is for ${lastVote.distro}.`);
         return;
       }
-      
-      // Remove old vote if exists
-      if (lastVote && votes[lastVote.distro]) {
-        votes[lastVote.distro] = Math.max(0, (votes[lastVote.distro] || 0) - 1);
-      }
-      
-      // Add new vote
-      votes[distroName] = (votes[distroName] || 0) + 1;
-      
-      lastVote = {
+
+      const { error } = await supabaseClient.from('votes').upsert({
+        user_id: currentUser.id,
         distro: distroName,
-        date: new Date().toISOString(),
-        user: currentUser.email
-      };
-      
-      localStorage.setItem('lastVote', JSON.stringify(lastVote));
-      saveVotes();
+        voted_at: new Date().toISOString()
+      });
+
+      if (error) {
+        alert('Something went wrong casting your vote, try again.');
+        return;
+      }
+
+      await loadVotes();
       renderLeaderboard();
-      
+
       alert(`✅ Voted for ${distroName}! You can change your vote in 6 months.`);
     }
 
@@ -2227,11 +2240,16 @@
     }
 
     // Modal
-    function showDistroModal(distroName) {
+    async function showDistroModal(distroName) {
       const distro = distros.find(d => d.name === distroName);
       if (!distro) return;
 
-      const distroComments = comments[distroName] || [];
+      const { data } = await supabaseClient
+        .from('comments')
+        .select('*')
+        .eq('distro', distroName)
+        .order('created_at', { ascending: false });
+      const distroComments = data || [];
 
       // Add wiki tooltips to bootloader text
       let bootloaderDisplay = distro.bootloader || 'GRUB';
@@ -2288,7 +2306,7 @@
             </div>
           ` : `
             <p style="color: var(--text-secondary); padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
-              Sign in with Google to leave a comment
+              Sign in to leave a comment
             </p>
           `}
 
@@ -2296,17 +2314,17 @@
             ${distroComments.length === 0 ? `
               <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No comments yet. Be the first!</p>
             ` : distroComments.map(comment => {
-              const canDelete = currentUser && (currentUser.email === comment.email || currentUser.email === ADMIN_EMAIL);
+              const canDelete = currentUser && currentUser.id === comment.user_id;
               return `
               <div class="comment">
                 <div class="comment-header">
-                  <span class="comment-author">${comment.username || comment.author || 'Anonymous'}</span>
+                  <span class="comment-author">${escapeHtml(comment.username || 'Anonymous')}</span>
                   <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span class="comment-date">${comment.date}</span>
-                    ${canDelete ? `<button onclick="deleteComment('${distroName}', ${comment.id})" style="background: var(--accent-tertiary); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Outfit', sans-serif;">Delete</button>` : ''}
+                    <span class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</span>
+                    ${canDelete ? `<button onclick="deleteComment('${distroName}', '${comment.id}')" style="background: var(--accent-tertiary); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Outfit', sans-serif;">Delete</button>` : ''}
                   </div>
                 </div>
-                <p class="comment-text">${comment.text}</p>
+                <p class="comment-text">${escapeHtml(comment.body)}</p>
               </div>
             `}).join('')}
           </div>
@@ -2325,158 +2343,170 @@
     }
 
     // Comments
-    function loadComments() {
-      const stored = localStorage.getItem('distroComments');
-      if (stored) {
-        comments = JSON.parse(stored);
-      }
-    }
-
-    function saveComments() {
-      localStorage.setItem('distroComments', JSON.stringify(comments));
-    }
-
-    function submitComment(distroName) {
+    async function submitComment(distroName) {
       const input = document.getElementById('commentInput');
       const text = input.value.trim();
-      
+
       if (!text || !currentUser) return;
 
-      if (!comments[distroName]) {
-        comments[distroName] = [];
-      }
-
-      comments[distroName].unshift({
+      const { error } = await supabaseClient.from('comments').insert({
+        distro: distroName,
+        user_id: currentUser.id,
         username: currentUser.username,
-        email: currentUser.email,
-        text: text,
-        date: new Date().toLocaleDateString(),
-        id: Date.now() + Math.random() // Unique ID for deletion
+        body: text
       });
 
-      saveComments();
-      showDistroModal(distroName);
+      if (error) {
+        alert('Could not post comment, try again.');
+        return;
+      }
+
+      await showDistroModal(distroName);
     }
 
-    function deleteComment(distroName, commentId) {
-      if (!comments[distroName]) return;
-      
-      comments[distroName] = comments[distroName].filter(c => c.id !== commentId);
-      saveComments();
-      showDistroModal(distroName);
+    async function deleteComment(distroName, commentId) {
+      const { error } = await supabaseClient.from('comments').delete().eq('id', commentId);
+      if (error) {
+        alert('Could not delete comment.');
+        return;
+      }
+      await showDistroModal(distroName);
     }
 
-    // Auth - Real Google OAuth
-    const ADMIN_EMAIL = 'wegetarian@gmail.com';
-    const GOOGLE_CLIENT_ID = '122326810746-iartir143fr6ukjhl9uaijksujuftbml.apps.googleusercontent.com'; // Replace with your actual client ID
-    
-    function initAuth() {
-      const stored = localStorage.getItem('mockUser');
-      if (stored) {
-        currentUser = JSON.parse(stored);
-        renderAuth();
+    // Auth - Supabase (username + password, no email collected)
+    let authMode = 'login';
+
+    function emailFor(username) {
+      return username.trim().toLowerCase() + '@distropicker.local';
+    }
+
+    async function initAuth() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        await loadProfile(session.user.id);
+      }
+      renderAuth();
+    }
+
+    async function loadProfile(userId) {
+      const { data } = await supabaseClient.from('profiles').select('username').eq('id', userId).single();
+      if (data) {
+        currentUser = { id: userId, username: data.username };
+      }
+    }
+
+    function openAuthModal(mode) {
+      authMode = mode;
+      updateAuthModalUI();
+      document.getElementById('authModal').classList.add('active');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.remove('active');
+      document.getElementById('authUsername').value = '';
+      document.getElementById('authPassword').value = '';
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      updateAuthModalUI();
+    }
+
+    function updateAuthModalUI() {
+      const isLogin = authMode === 'login';
+      document.getElementById('authTitle').textContent = isLogin ? 'Log In' : 'Sign Up';
+      document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Sign Up';
+      document.getElementById('authToggleLink').textContent = isLogin ? 'Need an account? Sign up' : 'Already have an account? Log in';
+    }
+
+    async function handleAuthSubmit() {
+      if (authMode === 'login') {
+        await handleLogin();
       } else {
-        renderAuth();
-      }
-      
-      // Initialize Google Sign-In
-      if (window.google) {
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleGoogleCallback
-        });
+        await handleSignup();
       }
     }
 
-    function handleGoogleCallback(response) {
-      // Decode the JWT token to get user info
-      const userData = parseJwt(response.credential);
-      
-      const email = userData.email;
-      const name = userData.name;
-      const picture = userData.picture;
-      
-      // Check if user already has a username
-      const existingUsers = JSON.parse(localStorage.getItem('allUsers') || '{}');
-      
-      if (existingUsers[email]) {
-        // Returning user
-        currentUser = existingUsers[email];
-        localStorage.setItem('mockUser', JSON.stringify(currentUser));
-        renderAuth();
-      } else {
-        // New user - ask for username
-        const username = prompt(`Welcome ${name}! Choose a username:`);
-        if (!username) {
-          alert('Username is required!');
-          return;
-        }
-        
-        currentUser = { 
-          email: email,
-          username: username,
-          name: name,
-          picture: picture,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Save to all users
-        existingUsers[email] = currentUser;
-        localStorage.setItem('allUsers', JSON.stringify(existingUsers));
-        localStorage.setItem('mockUser', JSON.stringify(currentUser));
-        renderAuth();
+    async function handleSignup() {
+      const username = document.getElementById('authUsername').value.trim();
+      const password = document.getElementById('authPassword').value;
+
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        alert('Username must be 3-20 characters: letters, numbers, underscores only.');
+        return;
       }
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: emailFor(username),
+        password: password,
+        options: { data: { username } }
+      });
+
+      if (error) {
+        alert(error.message.toLowerCase().includes('already registered') ? 'That username is taken.' : error.message);
+        return;
+      }
+
+      currentUser = { id: data.user.id, username };
+      closeAuthModal();
+      renderAuth();
+      await loadVotes();
+      renderLeaderboard();
     }
 
-    function parseJwt(token) {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
+    async function handleLogin() {
+      const username = document.getElementById('authUsername').value.trim();
+      const password = document.getElementById('authPassword').value;
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: emailFor(username),
+        password: password
+      });
+
+      if (error) {
+        alert('Wrong username or password.');
+        return;
+      }
+
+      await loadProfile(data.user.id);
+      closeAuthModal();
+      renderAuth();
+      await loadVotes();
+      renderLeaderboard();
     }
 
     function renderAuth() {
       const container = document.getElementById('authContainer');
-      
+
       if (currentUser) {
-        const avatarUrl = currentUser.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
+        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
         container.innerHTML = `
           <div class="user-info">
             <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
-            <span style="color: var(--text-primary); font-weight: 600;">${currentUser.username}</span>
-            ${currentUser.email === ADMIN_EMAIL ? '<span style="color: var(--accent-tertiary); margin-left: 0.5rem; font-size: 0.8rem; font-weight: 600;">ADMIN</span>' : ''}
+            <span style="color: var(--text-primary); font-weight: 600;">${escapeHtml(currentUser.username)}</span>
             <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
           </div>
         `;
       } else {
         container.innerHTML = `
-          <div id="googleSignInButton"></div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="openAuthModal('login')" style="padding: 0.5rem 1rem;">Log In</button>
+            <button class="btn btn-primary" onclick="openAuthModal('signup')" style="padding: 0.5rem 1rem;">Sign Up</button>
+          </div>
         `;
-        
-        // Render Google Sign-In button
-        if (window.google) {
-          google.accounts.id.renderButton(
-            document.getElementById('googleSignInButton'),
-            { 
-              theme: 'filled_blue',
-              size: 'large',
-              text: 'signin_with',
-              shape: 'rectangular'
-            }
-          );
-        }
       }
     }
 
-    function logout() {
+    async function logout() {
+      await supabaseClient.auth.signOut();
       currentUser = null;
-      localStorage.removeItem('mockUser');
-      if (window.google) {
-        google.accounts.id.disableAutoSelect();
-      }
       renderAuth();
+      await loadVotes();
+      renderLeaderboard();
     }
 
     // Utility
@@ -2484,10 +2514,21 @@
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
     // Close modal on click outside
     document.getElementById('distroModal').addEventListener('click', (e) => {
       if (e.target.id === 'distroModal') {
         closeModal();
+      }
+    });
+    document.getElementById('authModal').addEventListener('click', (e) => {
+      if (e.target.id === 'authModal') {
+        closeAuthModal();
       }
     });
   </script>
