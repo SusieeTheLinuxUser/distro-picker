@@ -25,7 +25,7 @@
   </script>
 
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
   <style>
     * {
       margin: 0;
@@ -994,6 +994,9 @@
         <input id="authUsername" type="text" placeholder="Username" autocomplete="username" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log In</button>
+        <div id="passkeyLoginRow">
+          <button class="btn btn-secondary" onclick="handleSignInWithPasskey()" style="width: 100%;">🔑 Sign in with a passkey</button>
+        </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
           <a href="#" id="authToggleLink" onclick="toggleAuthMode(); return false;" style="color: var(--accent-secondary);">Need an account? Sign up</a>
           <a href="#" onclick="alert('Skill Issue 💀 There is no email on file, so there is no way to send a reset link. Pick a password you\'ll remember next time, or make a new account.'); return false;" style="color: var(--text-secondary);">Forgot password?</a>
@@ -1617,7 +1620,8 @@
     // Supabase
     const supabaseClient = supabase.createClient(
       'https://wyhsdixvfnemobdvwiai.supabase.co',
-      'sb_publishable_z11dIXZaiySkuME6RvRyTQ_PaasAaoa'
+      'sb_publishable_z11dIXZaiySkuME6RvRyTQ_PaasAaoa',
+      { auth: { experimental: { passkey: true } } }
     );
 
     // State
@@ -2417,6 +2421,29 @@
       document.getElementById('authTitle').textContent = isLogin ? 'Log In' : 'Sign Up';
       document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Sign Up';
       document.getElementById('authToggleLink').textContent = isLogin ? 'Need an account? Sign up' : 'Already have an account? Log in';
+      document.getElementById('passkeyLoginRow').hidden = !isLogin;
+    }
+
+    async function handleSignInWithPasskey() {
+      const { data, error } = await supabaseClient.auth.signInWithPasskey();
+      if (error) {
+        alert('Passkey sign-in failed: ' + error.message);
+        return;
+      }
+      await loadProfile(data.user.id);
+      closeAuthModal();
+      renderAuth();
+      await loadVotes();
+      renderLeaderboard();
+    }
+
+    async function handleRegisterPasskey() {
+      const { error } = await supabaseClient.auth.registerPasskey();
+      if (error) {
+        alert('Could not add passkey: ' + error.message);
+        return;
+      }
+      alert('Passkey added! You can now sign in with it on this device.');
     }
 
     async function handleAuthSubmit() {
@@ -2488,6 +2515,7 @@
           <div class="user-info">
             <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
             <span style="color: var(--text-primary); font-weight: 600;">${escapeHtml(currentUser.username)}</span>
+            <button class="btn btn-secondary" onclick="handleRegisterPasskey()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;" title="Add a passkey so you can sign in without a password next time">🔑 Add Passkey</button>
             <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
           </div>
         `;
