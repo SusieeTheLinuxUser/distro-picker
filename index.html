@@ -954,6 +954,26 @@
     </p>
   </footer>
 
+  <!-- Background music -->
+  <audio id="bgm" src="bgm.mp3" loop autoplay muted></audio>
+  <button
+    id="muteBtn"
+    title="Music: Milkoi - LAST TIME (NCS - Copyright Free Music)"
+    style="position: fixed; bottom: 1rem; left: 1rem; z-index: 1000; width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--accent-primary); font-size: 1.3rem; cursor: pointer; box-shadow: var(--shadow);"
+  >🔇</button>
+  <script>
+    (function () {
+      const bgm = document.getElementById('bgm');
+      const muteBtn = document.getElementById('muteBtn');
+      bgm.volume = 0.4;
+      muteBtn.addEventListener('click', () => {
+        bgm.muted = !bgm.muted;
+        if (!bgm.muted) bgm.play();
+        muteBtn.textContent = bgm.muted ? '🔇' : '🔊';
+      });
+    })();
+  </script>
+
   <!-- Tooltip -->
   <div class="tooltip" id="tooltip"></div>
 
