@@ -1016,8 +1016,13 @@
           <input id="profileUsername" type="text" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         </div>
         <div>
-          <label style="font-size: 0.85rem; color: var(--text-secondary);">Avatar URL</label>
-          <input id="profileAvatarUrl" type="text" placeholder="https://... (leave blank for default)" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+          <label style="font-size: 0.85rem; color: var(--text-secondary);">Avatar</label>
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.35rem;">
+            <img id="profileAvatarPreview" src="" alt="" class="user-avatar" style="display: none;">
+            <input id="profileAvatarFile" type="file" accept="image/*" onchange="handleAvatarFileSelect(event)" style="flex: 1; color: var(--text-secondary); font-size: 0.85rem;">
+          </div>
+          <span id="profileAvatarStatus" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
+          <input id="profileAvatarUrl" type="text" placeholder="...or paste an image URL" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         </div>
         <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
 
@@ -2484,11 +2489,59 @@
       document.getElementById('profileUsername').value = currentUser.username;
       document.getElementById('profileAvatarUrl').value = currentUser.avatar_url || '';
       document.getElementById('profileNewPassword').value = '';
+      document.getElementById('profileAvatarFile').value = '';
+      document.getElementById('profileAvatarStatus').textContent = '';
+      const preview = document.getElementById('profileAvatarPreview');
+      if (currentUser.avatar_url) {
+        preview.src = currentUser.avatar_url;
+        preview.style.display = '';
+      } else {
+        preview.style.display = 'none';
+      }
       document.getElementById('profileModal').classList.add('active');
     }
 
     function closeProfileModal() {
       document.getElementById('profileModal').classList.remove('active');
+    }
+
+    async function handleAvatarFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const status = document.getElementById('profileAvatarStatus');
+
+      if (!file.type.startsWith('image/')) {
+        status.textContent = 'Please choose an image file.';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        status.textContent = 'Image must be under 5MB.';
+        return;
+      }
+
+      status.textContent = 'Uploading...';
+      const path = `${currentUser.id}/avatar`;
+      const { error } = await supabaseClient.storage.from('avatars').upload(path, file, {
+        upsert: true,
+        contentType: file.type
+      });
+
+      if (error) {
+        status.textContent = 'Upload failed: ' + error.message;
+        return;
+      }
+
+      const { data } = supabaseClient.storage.from('avatars').getPublicUrl(path, {
+        transform: { width: 128, height: 128, resize: 'cover' }
+      });
+      const publicUrl = data.publicUrl + '&cb=' + Date.now();
+
+      document.getElementById('profileAvatarUrl').value = publicUrl;
+      const preview = document.getElementById('profileAvatarPreview');
+      preview.src = publicUrl;
+      preview.style.display = '';
+      status.textContent = 'Uploaded — click Save Changes to apply.';
     }
 
     async function saveProfile() {
