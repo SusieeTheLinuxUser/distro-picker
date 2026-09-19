@@ -1005,6 +1005,33 @@
     </div>
   </div>
 
+  <!-- Modal for Edit Profile -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+      <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Edit Profile</h2>
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <label style="font-size: 0.85rem; color: var(--text-secondary);">Username</label>
+          <input id="profileUsername" type="text" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        </div>
+        <div>
+          <label style="font-size: 0.85rem; color: var(--text-secondary);">Avatar URL</label>
+          <input id="profileAvatarUrl" type="text" placeholder="https://... (leave blank for default)" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        </div>
+        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); width: 100%; margin: 0.5rem 0;">
+
+        <div>
+          <label style="font-size: 0.85rem; color: var(--text-secondary);">New Password</label>
+          <input id="profileNewPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        </div>
+        <button class="btn btn-secondary" onclick="changePassword()">Change Password</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Data
     const wikiTerms = {
@@ -2380,8 +2407,15 @@
     // Auth - Supabase (username + password, no email collected)
     let authMode = 'login';
 
-    function emailFor(username) {
-      return username.trim().toLowerCase() + '@distropicker.local';
+    // Login email is derived from the permanent user id, not the username,
+    // so renaming a username never needs to touch auth.users.email (which
+    // Supabase's updateUser() rejects for @distropicker.local addresses).
+    function loginEmailFor(userId) {
+      return userId + '@distropicker.local';
+    }
+
+    function randomSignupEmail() {
+      return crypto.randomUUID() + '@distropicker.local';
     }
 
     async function initAuth() {
@@ -2393,9 +2427,9 @@
     }
 
     async function loadProfile(userId) {
-      const { data } = await supabaseClient.from('profiles').select('username').eq('id', userId).single();
+      const { data } = await supabaseClient.from('profiles').select('username, avatar_url').eq('id', userId).single();
       if (data) {
-        currentUser = { id: userId, username: data.username };
+        currentUser = { id: userId, username: data.username, avatar_url: data.avatar_url };
       }
     }
 
@@ -2446,6 +2480,68 @@
       alert('Passkey added! You can now sign in with it on this device.');
     }
 
+    function openProfileModal() {
+      document.getElementById('profileUsername').value = currentUser.username;
+      document.getElementById('profileAvatarUrl').value = currentUser.avatar_url || '';
+      document.getElementById('profileNewPassword').value = '';
+      document.getElementById('profileModal').classList.add('active');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.remove('active');
+    }
+
+    async function saveProfile() {
+      const username = document.getElementById('profileUsername').value.trim();
+      const avatarUrl = document.getElementById('profileAvatarUrl').value.trim();
+
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        alert('Username must be 3-20 characters: letters, numbers, underscores only.');
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ username, avatar_url: avatarUrl || null })
+        .eq('id', currentUser.id);
+
+      if (error) {
+        alert(error.message.toLowerCase().includes('duplicate') ? 'That username is taken.' : 'Could not save profile, try again.');
+        return;
+      }
+
+      currentUser.username = username;
+      currentUser.avatar_url = avatarUrl || null;
+      closeProfileModal();
+      renderAuth();
+    }
+
+    async function changePassword() {
+      const password = document.getElementById('profileNewPassword').value;
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+
+      if (!confirm("Changing your password will log you out. You'll need to log in again with your new password. Continue?")) {
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.updateUser({ password });
+      if (error) {
+        alert('Could not change password: ' + error.message);
+        return;
+      }
+
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+      closeProfileModal();
+      renderAuth();
+      await loadVotes();
+      renderLeaderboard();
+    }
+
     async function handleAuthSubmit() {
       if (authMode === 'login') {
         await handleLogin();
@@ -2468,13 +2564,13 @@
       }
 
       const { data, error } = await supabaseClient.auth.signUp({
-        email: emailFor(username),
+        email: randomSignupEmail(),
         password: password,
         options: { data: { username } }
       });
 
       if (error) {
-        alert(error.message.toLowerCase().includes('already registered') ? 'That username is taken.' : error.message);
+        alert(error.message.toLowerCase().includes('duplicate') || error.message.toLowerCase().includes('already') ? 'That username is taken.' : error.message);
         return;
       }
 
@@ -2489,8 +2585,14 @@
       const username = document.getElementById('authUsername').value.trim();
       const password = document.getElementById('authPassword').value;
 
+      const { data: profile } = await supabaseClient.from('profiles').select('id').ilike('username', username).maybeSingle();
+      if (!profile) {
+        alert('Wrong username or password.');
+        return;
+      }
+
       const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: emailFor(username),
+        email: loginEmailFor(profile.id),
         password: password
       });
 
@@ -2510,11 +2612,13 @@
       const container = document.getElementById('authContainer');
 
       if (currentUser) {
-        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
+        const avatarUrl = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
         container.innerHTML = `
           <div class="user-info">
-            <img src="${avatarUrl}" alt="Avatar" class="user-avatar">
-            <span style="color: var(--text-primary); font-weight: 600;">${escapeHtml(currentUser.username)}</span>
+            <button onclick="openProfileModal()" style="display: flex; align-items: center; gap: 0.5rem; background: none; border: none; cursor: pointer; padding: 0; font-family: inherit;" title="Edit profile">
+              <img src="${escapeHtml(avatarUrl)}" alt="Avatar" class="user-avatar">
+              <span style="color: var(--text-primary); font-weight: 600;">${escapeHtml(currentUser.username)}</span>
+            </button>
             <button class="btn btn-secondary" onclick="handleRegisterPasskey()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;" title="Add a passkey so you can sign in without a password next time">🔑 Add Passkey</button>
             <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Logout</button>
           </div>
@@ -2543,9 +2647,12 @@
     }
 
     function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // Close modal on click outside
@@ -2557,6 +2664,11 @@
     document.getElementById('authModal').addEventListener('click', (e) => {
       if (e.target.id === 'authModal') {
         closeAuthModal();
+      }
+    });
+    document.getElementById('profileModal').addEventListener('click', (e) => {
+      if (e.target.id === 'profileModal') {
+        closeProfileModal();
       }
     });
   </script>
