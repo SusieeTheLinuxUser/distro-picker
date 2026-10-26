@@ -2739,10 +2739,9 @@
     // Div buttons (quiz options, distro cards) need manual Enter/Space activation
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const target = e.target.closest('[role="button"]');
-      if (!target) return;
+      if (!e.target.matches('div[role="button"]')) return;
       e.preventDefault(); // Space would otherwise scroll the page
-      target.click();
+      e.target.click();
     });
 
     // Close any open modal with Escape
