@@ -2287,6 +2287,25 @@
     }
 
     // Modal
+    // An open modal takes keyboard focus and makes the page behind it unreachable (inert);
+    // closing it hands focus back to whatever opened it.
+    const modalOpeners = [];
+    function showModalEl(id) {
+      const modal = document.getElementById(id);
+      modalOpeners.push(document.activeElement);
+      modal.classList.add('active');
+      for (const el of document.body.children) el.inert = el !== modal;
+      modal.querySelector('button, input, textarea, select, a[href]')?.focus();
+    }
+    function hideModalEl(id) {
+      const modal = document.getElementById(id);
+      if (!modal.classList.contains('active')) return;
+      modal.classList.remove('active');
+      const top = document.querySelector('.modal.active');
+      for (const el of document.body.children) el.inert = !!top && el !== top;
+      modalOpeners.pop()?.focus();
+    }
+
     async function showDistroModal(distroName) {
       const distro = distros.find(d => d.name === distroName);
       if (!distro) return;
@@ -2379,14 +2398,14 @@
       `;
 
       document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('distroModal').classList.add('active');
+      showModalEl('distroModal');
       
       // Re-setup tooltips for the bootloader terms in the modal
       setupTooltips();
     }
 
     function closeModal() {
-      document.getElementById('distroModal').classList.remove('active');
+      hideModalEl('distroModal');
     }
 
     // Comments
@@ -2452,11 +2471,11 @@
     function openAuthModal(mode) {
       authMode = mode;
       updateAuthModalUI();
-      document.getElementById('authModal').classList.add('active');
+      showModalEl('authModal');
     }
 
     function closeAuthModal() {
-      document.getElementById('authModal').classList.remove('active');
+      hideModalEl('authModal');
       document.getElementById('authUsername').value = '';
       document.getElementById('authPassword').value = '';
     }
@@ -2509,11 +2528,11 @@
       } else {
         preview.style.display = 'none';
       }
-      document.getElementById('profileModal').classList.add('active');
+      showModalEl('profileModal');
     }
 
     function closeProfileModal() {
-      document.getElementById('profileModal').classList.remove('active');
+      hideModalEl('profileModal');
     }
 
     async function handleAvatarFileSelect(event) {
