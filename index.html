@@ -337,6 +337,14 @@
       background: rgba(0, 255, 136, 0.1);
     }
 
+    .option:focus-visible,
+    .alt-card:focus-visible,
+    .distro-card:focus-visible {
+      border-color: var(--accent-secondary);
+      outline: 2px solid var(--accent-secondary);
+      outline-offset: 2px;
+    }
+
     .option-label {
       font-size: 1.1rem;
       font-weight: 600;
@@ -958,6 +966,7 @@
   <audio id="bgm" src="bgm.mp3" loop autoplay muted></audio>
   <button
     id="muteBtn"
+    aria-label="Toggle background music"
     title="Music: Milkoi - LAST TIME (NCS - Copyright Free Music)"
     style="position: fixed; bottom: 1rem; left: 1rem; z-index: 1000; width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--accent-primary); font-size: 1.3rem; cursor: pointer; box-shadow: var(--shadow);"
   >🔇</button>
@@ -1861,7 +1870,7 @@
             <h2 class="question-text">${question.question}</h2>
             <div class="options">
               ${question.options.map((opt, idx) => `
-                <div class="option" data-value="${opt.value}" onclick="selectOption('${opt.value}')">
+                <div class="option" data-value="${opt.value}" role="button" tabindex="0" aria-pressed="false" onclick="selectOption('${opt.value}')">
                   <div class="option-label">${opt.label}</div>
                   <div class="option-desc">${opt.desc}</div>
                 </div>
@@ -1899,8 +1908,10 @@
 
       document.querySelectorAll('.option').forEach(opt => {
         opt.classList.remove('selected');
+        opt.setAttribute('aria-pressed', 'false');
         if (opt.dataset.value === value) {
           opt.classList.add('selected');
+          opt.setAttribute('aria-pressed', 'true');
         }
       });
 
@@ -2008,7 +2019,7 @@
           <h3>You might also like these:</h3>
           <div class="alt-grid">
             ${alternatives.map(distro => `
-              <div class="alt-card" onclick="showDistroModal('${distro.name}')" style="border-color: ${distro.brandColor || '#00d4ff'}44;">
+              <div class="alt-card" role="button" tabindex="0" onclick="showDistroModal('${distro.name}')" style="border-color: ${distro.brandColor || '#00d4ff'}44;">
                 <h4 style="color: ${distro.brandColor || '#00d4ff'};">${distro.name}</h4>
                 <p>${distro.description}</p>
                 <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -2218,7 +2229,7 @@
     // Explore
     function renderExplore() {
       const html = distros.map(distro => `
-        <div class="distro-card" onclick="showDistroModal('${distro.name}')" style="border-color: ${distro.brandColor || '#00ff88'}33;">
+        <div class="distro-card" role="button" tabindex="0" onclick="showDistroModal('${distro.name}')" style="border-color: ${distro.brandColor || '#00ff88'}33;">
           <h3 style="color: ${distro.brandColor || '#00ff88'};">${distro.name}</h3>
           <p style="color: var(--text-secondary); margin-bottom: 1rem;">${distro.description}</p>
           <div class="distro-tags">
@@ -2276,6 +2287,25 @@
     }
 
     // Modal
+    // An open modal takes keyboard focus and makes the page behind it unreachable (inert);
+    // closing it hands focus back to whatever opened it.
+    const modalOpeners = [];
+    function showModalEl(id) {
+      const modal = document.getElementById(id);
+      modalOpeners.push(document.activeElement);
+      modal.classList.add('active');
+      for (const el of document.body.children) el.inert = el !== modal;
+      modal.querySelector('button, input, textarea, select, a[href]')?.focus();
+    }
+    function hideModalEl(id) {
+      const modal = document.getElementById(id);
+      if (!modal.classList.contains('active')) return;
+      modal.classList.remove('active');
+      const top = document.querySelector('.modal.active');
+      for (const el of document.body.children) el.inert = !!top && el !== top;
+      modalOpeners.pop()?.focus();
+    }
+
     async function showDistroModal(distroName) {
       const distro = distros.find(d => d.name === distroName);
       if (!distro) return;
@@ -2368,14 +2398,14 @@
       `;
 
       document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('distroModal').classList.add('active');
+      showModalEl('distroModal');
       
       // Re-setup tooltips for the bootloader terms in the modal
       setupTooltips();
     }
 
     function closeModal() {
-      document.getElementById('distroModal').classList.remove('active');
+      hideModalEl('distroModal');
     }
 
     // Comments
@@ -2441,11 +2471,11 @@
     function openAuthModal(mode) {
       authMode = mode;
       updateAuthModalUI();
-      document.getElementById('authModal').classList.add('active');
+      showModalEl('authModal');
     }
 
     function closeAuthModal() {
-      document.getElementById('authModal').classList.remove('active');
+      hideModalEl('authModal');
       document.getElementById('authUsername').value = '';
       document.getElementById('authPassword').value = '';
     }
@@ -2498,11 +2528,11 @@
       } else {
         preview.style.display = 'none';
       }
-      document.getElementById('profileModal').classList.add('active');
+      showModalEl('profileModal');
     }
 
     function closeProfileModal() {
-      document.getElementById('profileModal').classList.remove('active');
+      hideModalEl('profileModal');
     }
 
     async function handleAvatarFileSelect(event) {
@@ -2723,6 +2753,22 @@
       if (e.target.id === 'profileModal') {
         closeProfileModal();
       }
+    });
+
+    // Div buttons (quiz options, distro cards) need manual Enter/Space activation
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (!e.target.matches('div[role="button"]')) return;
+      e.preventDefault(); // Space would otherwise scroll the page
+      e.target.click();
+    });
+
+    // Close any open modal with Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      closeModal();
+      closeAuthModal();
+      closeProfileModal();
     });
   </script>
 </body>
