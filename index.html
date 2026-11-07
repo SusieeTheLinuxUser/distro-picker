@@ -890,7 +890,7 @@
               <span style="color: var(--text-secondary);"> Highly customizable, Windows-like. Beautiful and feature-rich.</span>
             </div>
             <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
-              <strong style="color: #87cf3e);">🪶 XFCE/MATE:</strong> 
+              <strong style="color: #87cf3e;">🪶 XFCE/MATE:</strong> 
               <span style="color: var(--text-secondary);"> Lightweight, traditional. Perfect for older computers.</span>
             </div>
             <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
@@ -1236,7 +1236,7 @@
         base: 'debian',
         immutable: false,
         release: 'stable',
-        desktop: 'xfce',
+        desktop: 'any',
         difficulty: 'beginner',
         description: 'Windows-like experience, extremely beginner-friendly, based on Ubuntu with Cinnamon desktop.',
         tags: ['Beginner-friendly', 'Cinnamon', 'User-friendly', 'Stable'],
@@ -1259,7 +1259,7 @@
         tags: ['Rolling', 'User-friendly', 'Arch', 'AUR'],
         useCase: ['daily', 'gaming'],
         website: 'https://manjaro.org/',
-        gpuSupport: ['amd', 'intel'],
+        gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: true,
         ramRecommended: '8gb',
         bootloader: 'GRUB',
@@ -1276,7 +1276,7 @@
         tags: ['Arch', 'Rolling', 'Community', 'Minimal'],
         useCase: ['daily', 'development'],
         website: 'https://endeavouros.com/',
-        gpuSupport: ['amd', 'intel'],
+        gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: true,
         ramRecommended: '4gb',
         bootloader: 'GRUB or systemd-boot (choice during install)',
@@ -1327,7 +1327,7 @@
         tags: ['DIY', 'Rolling', 'Minimal', 'Advanced'],
         useCase: ['development'],
         website: 'https://archlinux.org/',
-        gpuSupport: ['amd', 'intel'],
+        gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: false,
         ramRecommended: '4gb',
         bootloader: 'Choose any (GRUB, systemd-boot, Limine, rEFInd)',
@@ -1412,7 +1412,7 @@
         tags: ['Gaming', 'Performance', 'KDE', 'Beautiful'],
         useCase: ['gaming', 'daily'],
         website: 'https://garudalinux.org/',
-        gpuSupport: ['amd', 'intel'],
+        gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: true,
         ramRecommended: '8gb',
         bootloader: 'GRUB',
@@ -1463,7 +1463,7 @@
         tags: ['Performance', 'Gaming', 'Arch', 'Optimized'],
         useCase: ['gaming', 'daily'],
         website: 'https://cachyos.org/',
-        gpuSupport: ['amd', 'intel'],
+        gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: false,
         ramRecommended: '8gb',
         bootloader: 'GRUB or Limine (choice during install)',
@@ -1633,7 +1633,7 @@
         tags: ['Independent', 'Runit', 'No-systemd', 'Minimal'],
         useCase: ['development', 'daily'],
         website: 'https://voidlinux.org/',
-        gpuSupport: ['amd', 'intel'],
+        gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: true,
         ramRecommended: '4gb',
         bootloader: 'GRUB or rEFInd',
@@ -1861,7 +1861,7 @@
         }
 
         const question = quizQuestions[currentQuestion];
-        const progress = ((currentQuestion) / quizQuestions.length) * 100;
+        const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
         document.getElementById('progressFill').style.width = progress + '%';
 
         const html = `
@@ -2154,11 +2154,13 @@
         if (experience === 'some' && (distro.difficulty === 'beginner' || distro.difficulty === 'some')) score += 25;
         if (experience === 'intermediate' && distro.difficulty !== 'beginner') score += 20;
         if (experience === 'advanced' && distro.difficulty === 'advanced') score += 25;
+        if (experience === 'beginner' && distro.difficulty === 'advanced') score -= 30;
 
         // Hardware type - strongly favor laptop-friendly distros for laptop users
         if (deviceType === 'laptop' && distro.laptopFriendly) score += 35;
         if (deviceType === 'laptop' && !distro.laptopFriendly) score -= 20;
         if (deviceType === 'desktop' && !distro.laptopFriendly) score += 10;
+        if (deviceType === 'both' && distro.laptopFriendly) score += 15;
 
         // GPU support - CRITICAL for NVIDIA users
         if (gpu === 'nvidia') {
@@ -2201,7 +2203,7 @@
         if (desktop === 'any' || distro.desktop === 'any' || desktop === distro.desktop) score += 10;
 
         // Release type
-        if (release === distro.release || release === 'any' || distro.release === 'semi') score += 15;
+        if (release === 'any' || distro.release === 'any' || release === distro.release) score += 15;
 
         // Use case
         if (distro.useCase.includes(useCase)) score += 20;
