@@ -1659,7 +1659,8 @@
     ];
 
     // Supabase
-    const supabaseClient = supabase.createClient(
+    // Null when the Supabase script is blocked or fails to load: the quiz still works, online features are skipped.
+    const supabaseClient = window.supabase && supabase.createClient(
       'https://wyhsdixvfnemobdvwiai.supabase.co',
       'sb_publishable_z11dIXZaiySkuME6RvRyTQ_PaasAaoa',
       { auth: { experimental: { passkey: true } } }
@@ -1679,14 +1680,18 @@
         console.log('Total distros:', distros.length);
         console.log('Total questions:', quizQuestions.length);
 
-        await initAuth();
         renderQuestion();
         renderExplore();
         renderWiki();
-        await loadVotes();
-        renderLeaderboard();
         setupNavigation();
         setupTooltips();
+        try {
+          await initAuth();
+          await loadVotes();
+        } catch (error) {
+          console.warn('Online features unavailable:', error);
+        }
+        renderLeaderboard();
 
         console.log('DistroMatch initialized successfully!');
       } catch (error) {
@@ -1697,7 +1702,7 @@
 
     // Leaderboard
     async function loadVotes() {
-      const { data } = await supabaseClient.from('votes').select('*');
+      const { data } = (await supabaseClient?.from('votes').select('*')) ?? {};
       votes = {};
       lastVote = null;
       (data || []).forEach(row => {
@@ -2312,11 +2317,11 @@
       const distro = distros.find(d => d.name === distroName);
       if (!distro) return;
 
-      const { data } = await supabaseClient
-        .from('comments')
+      const { data } = (await supabaseClient
+        ?.from('comments')
         .select('*')
         .eq('distro', distroName)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })) ?? {};
       const distroComments = data || [];
 
       // Add wiki tooltips to bootloader text
@@ -2456,6 +2461,7 @@
     }
 
     async function initAuth() {
+      if (!supabaseClient) return;
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         await loadProfile(session.user.id);
