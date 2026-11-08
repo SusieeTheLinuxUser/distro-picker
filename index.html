@@ -2274,11 +2274,18 @@
     function setupTooltips() {
       document.querySelectorAll('.wiki-term').forEach(term => {
         term.addEventListener('mouseenter', (e) => showTooltip(e, term.dataset.term));
-        term.addEventListener('mouseleave', hideTooltip);
+        // Keep it open while the term has keyboard focus
+        term.addEventListener('mouseleave', () => { if (document.activeElement !== term) hideTooltip(); });
         term.tabIndex = 0;
-        term.setAttribute('aria-describedby', 'tooltip');
-        term.addEventListener('focus', (e) => showTooltip(e, term.dataset.term));
-        term.addEventListener('blur', hideTooltip);
+        // Only the focused term points at the shared tooltip, so terms don't borrow each other's text
+        term.addEventListener('focus', (e) => {
+          showTooltip(e, term.dataset.term);
+          term.setAttribute('aria-describedby', 'tooltip');
+        });
+        term.addEventListener('blur', () => {
+          term.removeAttribute('aria-describedby');
+          hideTooltip();
+        });
       });
     }
 
