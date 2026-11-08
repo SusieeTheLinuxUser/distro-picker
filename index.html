@@ -991,7 +991,7 @@
   </script>
 
   <!-- Tooltip -->
-  <div class="tooltip" id="tooltip"></div>
+  <div class="tooltip" id="tooltip" role="tooltip"></div>
 
   <!-- Modal for Distro Details -->
   <div class="modal" id="distroModal">
@@ -1619,7 +1619,7 @@
         release: 'semi',
         desktop: 'kde',
         difficulty: 'beginner',
-        description: 'Brazilian openSUSE-based gaming distro with KDE Plasma. Pre-configured with Steam, Lutris, and gaming tools.',
+        description: 'Brazilian openSUSE-based gaming distro with KDE Plasma. Ships its own Game Access launcher for your games.',
         tags: ['Gaming', 'openSUSE', 'Pre-configured', 'User-friendly'],
         useCase: ['gaming', 'daily'],
         website: 'https://www.regataos.com.br/',
@@ -2276,6 +2276,7 @@
         term.addEventListener('mouseenter', (e) => showTooltip(e, term.dataset.term));
         term.addEventListener('mouseleave', hideTooltip);
         term.tabIndex = 0;
+        term.setAttribute('aria-describedby', 'tooltip');
         term.addEventListener('focus', (e) => showTooltip(e, term.dataset.term));
         term.addEventListener('blur', hideTooltip);
       });
