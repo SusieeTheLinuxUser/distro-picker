@@ -777,6 +777,13 @@
       transform: rotate(90deg);
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       h1 {
@@ -1000,8 +1007,8 @@
       <button class="modal-close" onclick="closeAuthModal()">&times;</button>
       <h2 id="authTitle" style="color: var(--accent-primary); margin-bottom: 1.5rem;">Log In</h2>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <input id="authUsername" type="text" placeholder="Username" autocomplete="username" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
-        <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        <input id="authUsername" type="text" aria-label="Username" placeholder="Username" autocomplete="username" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+        <input id="authPassword" type="password" aria-label="Password" placeholder="Password" autocomplete="current-password" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log In</button>
         <div id="passkeyLoginRow">
           <button class="btn btn-secondary" onclick="handleSignInWithPasskey()" style="width: 100%;">🔑 Sign in with a passkey</button>
@@ -1021,24 +1028,24 @@
       <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Edit Profile</h2>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <div>
-          <label style="font-size: 0.85rem; color: var(--text-secondary);">Username</label>
+          <label for="profileUsername" style="font-size: 0.85rem; color: var(--text-secondary);">Username</label>
           <input id="profileUsername" type="text" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         </div>
         <div>
-          <label style="font-size: 0.85rem; color: var(--text-secondary);">Avatar</label>
+          <label for="profileAvatarFile" style="font-size: 0.85rem; color: var(--text-secondary);">Avatar</label>
           <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.35rem;">
             <img id="profileAvatarPreview" src="" alt="" class="user-avatar" style="display: none;">
             <input id="profileAvatarFile" type="file" accept="image/*" onchange="handleAvatarFileSelect(event)" style="flex: 1; color: var(--text-secondary); font-size: 0.85rem;">
           </div>
           <span id="profileAvatarStatus" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
-          <input id="profileAvatarUrl" type="text" placeholder="...or paste an image URL" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
+          <input id="profileAvatarUrl" type="text" aria-label="Avatar image URL" placeholder="...or paste an image URL" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         </div>
         <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
 
         <hr style="border: none; border-top: 1px solid var(--border-color); width: 100%; margin: 0.5rem 0;">
 
         <div>
-          <label style="font-size: 0.85rem; color: var(--text-secondary);">New Password</label>
+          <label for="profileNewPassword" style="font-size: 0.85rem; color: var(--text-secondary);">New Password</label>
           <input id="profileNewPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password" style="width: 100%; margin-top: 0.35rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         </div>
         <button class="btn btn-secondary" onclick="changePassword()">Change Password</button>
@@ -1207,7 +1214,7 @@
         description: 'Immutable desktop OS based on Fedora with rpm-ostree. Perfect balance of stability and cutting-edge features.',
         tags: ['Immutable', 'GNOME', 'Fedora', 'Flatpak'],
         useCase: ['daily', 'development'],
-        website: 'https://fedoraproject.org/silverblue/',
+        website: 'https://fedoraproject.org/atomic-desktops/silverblue/',
         gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: true,
         ramRecommended: '8gb',
@@ -1287,10 +1294,10 @@
         base: 'debian',
         immutable: false,
         release: 'stable',
-        desktop: 'gnome',
+        desktop: 'cosmic',
         difficulty: 'beginner',
         description: 'Ubuntu-based distro by System76. Excellent for gaming and development, great NVIDIA support.',
-        tags: ['Gaming', 'NVIDIA', 'GNOME', 'User-friendly'],
+        tags: ['Gaming', 'NVIDIA', 'COSMIC', 'User-friendly'],
         useCase: ['daily', 'gaming', 'development'],
         website: 'https://pop.system76.com/',
         gpuSupport: ['nvidia', 'amd', 'intel'],
@@ -1428,7 +1435,7 @@
         description: 'Immutable version of Fedora with KDE Plasma. Modern and stable.',
         tags: ['Immutable', 'KDE', 'Fedora', 'Modern'],
         useCase: ['daily', 'development'],
-        website: 'https://fedoraproject.org/kinoite/',
+        website: 'https://fedoraproject.org/atomic-desktops/kinoite/',
         gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: true,
         ramRecommended: '8gb',
@@ -1607,15 +1614,15 @@
       },
       {
         name: 'Regata OS',
-        base: 'fedora',
+        base: 'independent',
         immutable: false,
         release: 'semi',
-        desktop: 'gnome',
+        desktop: 'kde',
         difficulty: 'beginner',
-        description: 'Brazilian Fedora-based gaming distro. Pre-configured with Steam, Lutris, and gaming tools.',
-        tags: ['Gaming', 'Fedora', 'Pre-configured', 'User-friendly'],
+        description: 'Brazilian openSUSE-based gaming distro with KDE Plasma. Pre-configured with Steam, Lutris, and gaming tools.',
+        tags: ['Gaming', 'openSUSE', 'Pre-configured', 'User-friendly'],
         useCase: ['gaming', 'daily'],
-        website: 'https://regataos.com/',
+        website: 'https://www.regataos.com.br/',
         gpuSupport: ['nvidia', 'amd', 'intel'],
         laptopFriendly: false,
         ramRecommended: '16gb',
@@ -1812,7 +1819,7 @@
                 return `
                   <div style="background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; border-left: 4px solid ${distro.color}; position: relative; overflow: hidden;">
                     <div style="position: absolute; top: 0; left: 0; bottom: 0; width: ${percentage}%; background: ${distro.color}15; transition: width 0.5s ease;"></div>
-                    <div style="position: relative; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="position: relative; display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: space-between; align-items: center;">
                       <div style="display: flex; align-items: center; gap: 1rem;">
                         <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; min-width: 2rem;">#${index + 1}</span>
                         ${medal ? `<span style="font-size: 1.5rem;">${medal}</span>` : ''}
@@ -2268,6 +2275,9 @@
       document.querySelectorAll('.wiki-term').forEach(term => {
         term.addEventListener('mouseenter', (e) => showTooltip(e, term.dataset.term));
         term.addEventListener('mouseleave', hideTooltip);
+        term.tabIndex = 0;
+        term.addEventListener('focus', (e) => showTooltip(e, term.dataset.term));
+        term.addEventListener('blur', hideTooltip);
       });
     }
 
@@ -2285,7 +2295,7 @@
       tooltip.style.display = 'block';
       
       const rect = e.target.getBoundingClientRect();
-      tooltip.style.left = rect.left + 'px';
+      tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - tooltip.offsetWidth - 8)) + 'px';
       tooltip.style.top = (rect.bottom + 10) + 'px';
     }
 

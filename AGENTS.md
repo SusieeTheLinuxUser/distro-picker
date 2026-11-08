@@ -72,5 +72,8 @@ Change `answers` (values come from `quizQuestions` options). This relies on the 
 
 - **#12 scoring bugs:** compare the **user's** answer to the distro field (it once checked `distro.release === 'semi'` alone, so every semi-rolling distro got +15). Treat `'any'` on either side as a match. Check `gpuSupport` is right: wrong NVIDIA flags give −40. The progress bar counts from question 1, not 0.
 - When adding a distro, fill every field the scoring reads, or it silently scores low.
+- A `desktop` value outside the quiz options (Pop!_OS is `'cosmic'` since 24.04) only matches the "No preference" answer. That's on purpose.
+- openSUSE-based distros (Tumbleweed, Regata OS) use `base: 'independent'`; the quiz has no openSUSE option.
+- Distro links rot: Fedora's atomic desktops moved to `fedoraproject.org/atomic-desktops/…`, and `regataos.com` was taken over by a spam site (real one is `regataos.com.br`). Re-check links with `curl -L` now and then.
 - `README.md` still says "Google sign-in"; auth is now username/password and passkeys.
 - Console logs still say "DistroMatch" (old name).
