@@ -45,7 +45,7 @@ The main `<script>` near the bottom holds, in order:
 ## Testing locally
 
 - Quiz, Explore and Wiki: just open `index.html` in a browser.
-- With a server (needed for passkeys): `python3 -m http.server` (or `npx serve`), then http://localhost:8000.
+- With a server (needed for passkeys): `python3 -m http.server` (or `npx serve -l 8000`), then http://localhost:8000.
 - Syntax check: pull the inline script out and run `node --check` on it.
 - Check scoring without a browser (prints distro count and the pick):
 
