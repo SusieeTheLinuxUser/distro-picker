@@ -2273,9 +2273,10 @@
     // Tooltips
     function setupTooltips() {
       document.querySelectorAll('.wiki-term').forEach(term => {
-        term.addEventListener('mouseenter', (e) => showTooltip(e, term.dataset.term));
-        // Keep it open while the term has keyboard focus
-        term.addEventListener('mouseleave', () => { if (document.activeElement !== term) hideTooltip(); });
+        // While any term has focus, the tooltip belongs to it; hover doesn't change or hide it
+        const termFocused = () => document.activeElement?.classList.contains('wiki-term');
+        term.addEventListener('mouseenter', (e) => { if (!termFocused()) showTooltip(e, term.dataset.term); });
+        term.addEventListener('mouseleave', () => { if (!termFocused()) hideTooltip(); });
         term.tabIndex = 0;
         // Only the focused term points at the shared tooltip, so terms don't borrow each other's text
         term.addEventListener('focus', (e) => {
