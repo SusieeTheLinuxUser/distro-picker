@@ -2318,7 +2318,8 @@
     const modalOpeners = [];
     function showModalEl(id) {
       const modal = document.getElementById(id);
-      modalOpeners.push(document.activeElement);
+      // Re-rendering an already-open modal destroys the focused control; don't record <body> as a second opener.
+      if (!modal.classList.contains('active')) modalOpeners.push(document.activeElement);
       modal.classList.add('active');
       for (const el of document.body.children) el.inert = el !== modal;
       modal.querySelector('button, input, textarea, select, a[href]')?.focus();
