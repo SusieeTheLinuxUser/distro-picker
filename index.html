@@ -2479,6 +2479,11 @@
       return crypto.randomUUID() + '@distropicker.local';
     }
 
+    // Usernames may contain '_', which ILIKE treats as a wildcard.
+    function escapeLike(s) {
+      return s.replace(/\\/g, '\\\\').replace(/[%_]/g, '\\$&');
+    }
+
     async function initAuth() {
       if (!supabaseClient) return;
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -2695,7 +2700,13 @@
       const username = document.getElementById('authUsername').value.trim();
       const password = document.getElementById('authPassword').value;
 
-      const { data: profile } = await supabaseClient.from('profiles').select('id').ilike('username', username).maybeSingle();
+      // Same rule as sign-up; also keeps '*' (a PostgREST wildcard) out of the query.
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        alert('Wrong username or password.');
+        return;
+      }
+
+      const { data: profile } = await supabaseClient.from('profiles').select('id').ilike('username', escapeLike(username)).maybeSingle();
       if (!profile) {
         alert('Wrong username or password.');
         return;
