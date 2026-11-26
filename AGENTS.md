@@ -71,7 +71,8 @@ Change `answers` (values come from `quizQuestions` options). This relies on the 
 ## Gotchas from past PRs
 
 - **#12 scoring bugs:** compare the **user's** answer to the distro field (it once checked `distro.release === 'semi'` alone, so every semi-rolling distro got +15). Treat `'any'` on either side as a match. Check `gpuSupport` is right: wrong NVIDIA flags give −40. The progress bar counts from question 1, not 0.
-- Immutable preference answers are hard constraints: `yes` only recommends immutable distros, `no` only traditional distros, and `unsure` keeps the full pool.
+- Immutable preference answers are hard constraints: `yes` only recommends immutable distros, `no` only traditional distros, and `unsure` keeps the full pool. Server/headless only recommends distros marked for server use.
+- Quiz question changes move keyboard focus to the new heading; section navigation returns to the top of the page. Background audio starts only after the user unmutes it.
 - When adding a distro, fill every field the scoring reads, or it silently scores low.
 - A `desktop` value outside the quiz options (Pop!_OS is `'cosmic'` since 24.04) only matches the "No preference" answer. That's on purpose.
 - openSUSE-based distros (Tumbleweed, Regata OS) use `base: 'independent'`; the quiz has no openSUSE option.
