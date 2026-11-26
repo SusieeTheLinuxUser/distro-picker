@@ -79,3 +79,4 @@ Change `answers` (values come from `quizQuestions` options). This relies on the 
 - Distro links rot: Fedora's atomic desktops moved to `fedoraproject.org/atomic-desktops/…`, and `regataos.com` was taken over by a spam site (real one is `regataos.com.br`). Re-check links with `curl -L` now and then.
 - Modal focus: `showModalEl` records the opener only when the modal is closed, so re-rendering an open modal (post/delete comment calls `showDistroModal` again) is safe. Don't remove that guard, or Esc sends focus to `<body>`.
 - Console logs still say "DistroMatch" (old name).
+- Avatar uploads allow only PNG, JPEG, WebP and GIF because SVG can run scripts on the storage domain; `openAuthModal` shows an alert and returns when `supabaseClient` is null. `canVote()` and the "next vote" message both use `nextVoteDateFrom()` so they agree at month end.
