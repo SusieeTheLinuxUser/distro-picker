@@ -76,5 +76,4 @@ Change `answers` (values come from `quizQuestions` options). This relies on the 
 - openSUSE-based distros (Tumbleweed, Regata OS) use `base: 'independent'`; the quiz has no openSUSE option.
 - Distro links rot: Fedora's atomic desktops moved to `fedoraproject.org/atomic-desktops/…`, and `regataos.com` was taken over by a spam site (real one is `regataos.com.br`). Re-check links with `curl -L` now and then.
 - Modal focus: `showModalEl` records the opener only when the modal is closed, so re-rendering an open modal (post/delete comment calls `showDistroModal` again) is safe. Don't remove that guard, or Esc sends focus to `<body>`.
-- `README.md` still says "Google sign-in"; auth is now username/password and passkeys.
 - Console logs still say "DistroMatch" (old name).
