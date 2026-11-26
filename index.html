@@ -2356,13 +2356,16 @@
       if (!modal.classList.contains('active')) modalOpeners.push(document.activeElement);
       modal.classList.add('active');
       for (const el of document.body.children) el.inert = el !== modal;
-      modal.querySelector('button, input, textarea, select, a[href]')?.focus();
+      const initialFocus = modal.querySelector('input:not([type="hidden"]), textarea, select')
+        || modal.querySelector('button:not(.modal-close), a[href]')
+        || modal.querySelector('.modal-close');
+      initialFocus?.focus();
     }
     function hideModalEl(id) {
       const modal = document.getElementById(id);
       if (!modal.classList.contains('active')) return;
       modal.classList.remove('active');
-      const top = document.querySelector('.modal.active');
+      const top = Array.from(document.querySelectorAll('.modal.active')).at(-1);
       for (const el of document.body.children) el.inert = !!top && el !== top;
       modalOpeners.pop()?.focus();
     }
@@ -2767,6 +2770,7 @@
 
     function renderAuth() {
       const container = document.getElementById('authContainer');
+      const restoreFocus = container.contains(document.activeElement);
 
       if (currentUser) {
         const avatarUrl = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
@@ -2788,6 +2792,8 @@
           </div>
         `;
       }
+
+      if (restoreFocus) container.querySelector('button')?.focus();
     }
 
     async function logout() {
@@ -2840,9 +2846,10 @@
     // Close any open modal with Escape
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-      closeModal();
-      closeAuthModal();
-      closeProfileModal();
+      const topmostModal = Array.from(document.querySelectorAll('.modal.active')).at(-1);
+      if (topmostModal?.id === 'distroModal') closeModal();
+      else if (topmostModal?.id === 'authModal') closeAuthModal();
+      else if (topmostModal?.id === 'profileModal') closeProfileModal();
     });
   </script>
 </body>
