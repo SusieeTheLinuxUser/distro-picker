@@ -2505,6 +2505,7 @@
         return;
       }
 
+      if (input.value.trim() === text) input.value = '';
       await showDistroModal(distroName);
     }
 
