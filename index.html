@@ -1035,7 +1035,7 @@
           <label for="profileAvatarFile" style="font-size: 0.85rem; color: var(--text-secondary);">Avatar</label>
           <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.35rem;">
             <img id="profileAvatarPreview" src="" alt="" class="user-avatar" style="display: none;">
-            <input id="profileAvatarFile" type="file" accept="image/*" onchange="handleAvatarFileSelect(event)" style="flex: 1; color: var(--text-secondary); font-size: 0.85rem;">
+            <input id="profileAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="handleAvatarFileSelect(event)" style="flex: 1; color: var(--text-secondary); font-size: 0.85rem;">
           </div>
           <span id="profileAvatarStatus" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
           <input id="profileAvatarUrl" type="text" aria-label="Avatar image URL" placeholder="...or paste an image URL" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
@@ -1703,7 +1703,7 @@
         console.log('DistroMatch initialized successfully!');
       } catch (error) {
         console.error('Initialization error:', error);
-        document.body.innerHTML = '<div style="padding: 2rem; color: red;">Error initializing app: ' + error.message + '</div>';
+        document.body.innerHTML = '<div style="padding: 2rem; color: red;">Error initializing app: ' + escapeHtml(error.message) + '</div>';
       }
     });
 
@@ -1724,11 +1724,16 @@
       if (!currentUser) return false;
       if (!lastVote) return true;
       
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      
-      const lastVoteDate = new Date(lastVote.date);
-      return lastVoteDate < sixMonthsAgo;
+      return new Date() >= nextVoteDateFrom(lastVote.date);
+    }
+
+    // Same date the user is told about, so the gate and the message always agree.
+    function nextVoteDateFrom(dateStr) {
+      const d = new Date(dateStr);
+      const day = d.getDate();
+      d.setMonth(d.getMonth() + 6);
+      if (d.getDate() !== day) d.setDate(0);
+      return d;
     }
 
     async function voteForDistro(distroName) {
@@ -1738,9 +1743,7 @@
       }
 
       if (!canVote()) {
-        const lastVoteDate = new Date(lastVote.date);
-        const nextVoteDate = new Date(lastVoteDate);
-        nextVoteDate.setMonth(nextVoteDate.getMonth() + 6);
+        const nextVoteDate = nextVoteDateFrom(lastVote.date);
         alert(`You can vote again on ${nextVoteDate.toLocaleDateString()}. Your current vote is for ${lastVote.distro}.`);
         return;
       }
@@ -1777,12 +1780,11 @@
       // User voting status
       if (currentUser) {
         if (userHasVoted && !userCanVote) {
-          const nextVoteDate = new Date(lastVote.date);
-          nextVoteDate.setMonth(nextVoteDate.getMonth() + 6);
+          const nextVoteDate = nextVoteDateFrom(lastVote.date);
           html += `
             <div style="background: var(--bg-card); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
               <p style="color: var(--text-primary); text-align: center;">
-                ✅ You voted for <strong style="color: var(--accent-primary);">${lastVote.distro}</strong>
+                ✅ You voted for <strong style="color: var(--accent-primary);">${escapeHtml(lastVote.distro)}</strong>
                 <br>
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">Next vote available: ${nextVoteDate.toLocaleDateString()}</span>
               </p>
@@ -2339,7 +2341,9 @@
       
       const rect = e.target.getBoundingClientRect();
       tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - tooltip.offsetWidth - 8)) + 'px';
-      tooltip.style.top = (rect.bottom + 10) + 'px';
+      let top = rect.bottom + 10;
+      if (top + tooltip.offsetHeight > window.innerHeight - 8) top = rect.top - tooltip.offsetHeight - 10;
+      tooltip.style.top = Math.max(8, top) + 'px';
     }
 
     function hideTooltip() {
@@ -2451,7 +2455,7 @@
                   <span class="comment-author">${escapeHtml(comment.username || 'Anonymous')}</span>
                   <div style="display: flex; align-items: center; gap: 1rem;">
                     <span class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</span>
-                    ${canDelete ? `<button onclick="deleteComment('${distroName}', '${comment.id}')" style="background: var(--accent-tertiary); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Outfit', sans-serif;">Delete</button>` : ''}
+                    ${canDelete ? `<button onclick="deleteComment('${distroName}', ${escapeHtml(JSON.stringify(comment.id))})" style="background: var(--accent-tertiary); color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: 'Outfit', sans-serif;">Delete</button>` : ''}
                   </div>
                 </div>
                 <p class="comment-text">${escapeHtml(comment.body)}</p>
@@ -2473,18 +2477,28 @@
     }
 
     // Comments
+    let postingComment = false;
     async function submitComment(distroName) {
+      if (postingComment) return;
       const input = document.getElementById('commentInput');
       const text = input.value.trim();
 
       if (!text || !currentUser) return;
 
-      const { error } = await supabaseClient.from('comments').insert({
-        distro: distroName,
-        user_id: currentUser.id,
-        username: currentUser.username,
-        body: text
-      });
+      postingComment = true;
+      let error;
+      try {
+        ({ error } = await supabaseClient.from('comments').insert({
+          distro: distroName,
+          user_id: currentUser.id,
+          username: currentUser.username,
+          body: text
+        }));
+      } catch (e) {
+        error = e;
+      } finally {
+        postingComment = false;
+      }
 
       if (error) {
         alert('Could not post comment, try again.');
@@ -2495,8 +2509,9 @@
     }
 
     async function deleteComment(distroName, commentId) {
+      if (!currentUser) return;
       if (!confirm('Delete this comment? This cannot be undone.')) return;
-      const { error } = await supabaseClient.from('comments').delete().eq('id', commentId);
+      const { error } = await supabaseClient.from('comments').delete().eq('id', commentId).eq('user_id', currentUser.id);
       if (error) {
         alert('Could not delete comment.');
         return;
@@ -2540,6 +2555,7 @@
     }
 
     function openAuthModal(mode) {
+      if (!supabaseClient) { alert('Online features are unavailable right now (could not reach the server).'); return; }
       authMode = mode;
       updateAuthModalUI();
       showModalEl('authModal');
@@ -2612,8 +2628,8 @@
 
       const status = document.getElementById('profileAvatarStatus');
 
-      if (!file.type.startsWith('image/')) {
-        status.textContent = 'Please choose an image file.';
+      if (!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type)) {
+        status.textContent = 'Please choose a PNG, JPEG, WebP or GIF image.';
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
