@@ -2145,6 +2145,12 @@
       return reasons.map(reason => `<p style="margin-bottom: 1rem;">• ${reason}</p>`).join('');
     }
 
+    function matchesImmutablePreference(distro) {
+      if (answers[5] === 'yes') return distro.immutable;
+      if (answers[5] === 'no') return !distro.immutable;
+      return true;
+    }
+
     function calculateRecommendation() {
       const experience = answers[1];
       const deviceType = answers[2];
@@ -2158,7 +2164,7 @@
 
       let scores = {};
       
-      distros.forEach(distro => {
+      distros.filter(matchesImmutablePreference).forEach(distro => {
         let score = 0;
 
         // Experience level matching
@@ -2228,10 +2234,20 @@
     }
 
     function calculateAlternatives(recommended) {
-      return distros
+      const eligibleDistros = distros
         .filter(d => d.name !== recommended.name)
+        .filter(matchesImmutablePreference);
+      const alternatives = eligibleDistros
         .filter(d => d.base === recommended.base || d.difficulty === recommended.difficulty)
         .slice(0, 3);
+
+      if (alternatives.length < 3) {
+        alternatives.push(...eligibleDistros
+          .filter(d => !alternatives.includes(d))
+          .slice(0, 3 - alternatives.length));
+      }
+
+      return alternatives;
     }
 
     function restartQuiz() {
