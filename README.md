@@ -9,7 +9,7 @@ A quiz that recommends a Linux distro based on your hardware, GPU, and experienc
 - 9-question quiz → personalized distro match
 - Explore distros and browse a Linux wiki
 - Step-by-step install guide
-- Community leaderboard and comments (Google sign-in)
+- Community leaderboard and comments (username/password or passkey sign-in)
 
 ## Stack
 

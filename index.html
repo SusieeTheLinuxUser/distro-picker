@@ -519,7 +519,7 @@
     /* Wiki/Comments Section */
     .distro-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
       gap: 2rem;
     }
 
@@ -955,7 +955,7 @@
     <section id="leaderboard" class="section">
       <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">🏆 Community Leaderboard</h2>
       <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-        Vote for your favorite distro! You can vote once every 6 months. Leaderboard resets every 6 months.
+        Vote for your favorite distro! You can change your vote once every 6 months.
       </p>
       <div id="leaderboardContent"></div>
     </section>
@@ -970,7 +970,7 @@
   </footer>
 
   <!-- Background music -->
-  <audio id="bgm" src="bgm.mp3" loop autoplay muted></audio>
+  <audio id="bgm" src="bgm.mp3" loop muted preload="none"></audio>
   <button
     id="muteBtn"
     aria-label="Toggle background music"
@@ -995,37 +995,37 @@
 
   <!-- Modal for Distro Details -->
   <div class="modal" id="distroModal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Distro details">
+      <button class="modal-close" aria-label="Close distro details" onclick="closeModal()">&times;</button>
       <div id="modalContent"></div>
     </div>
   </div>
 
   <!-- Modal for Login / Sign Up -->
   <div class="modal" id="authModal">
-    <div class="modal-content" style="max-width: 400px;">
-      <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="authTitle" style="max-width: 400px;">
+      <button class="modal-close" aria-label="Close authentication dialog" onclick="closeAuthModal()">&times;</button>
       <h2 id="authTitle" style="color: var(--accent-primary); margin-bottom: 1.5rem;">Log In</h2>
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <form onsubmit="handleAuthSubmit(); return false;" style="display: flex; flex-direction: column; gap: 1rem;">
         <input id="authUsername" type="text" aria-label="Username" placeholder="Username" autocomplete="username" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         <input id="authPassword" type="password" aria-label="Password" placeholder="Password" autocomplete="current-password" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
-        <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuthSubmit()">Log In</button>
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn">Log In</button>
         <div id="passkeyLoginRow">
-          <button class="btn btn-secondary" onclick="handleSignInWithPasskey()" style="width: 100%;">🔑 Sign in with a passkey</button>
+          <button type="button" class="btn btn-secondary" onclick="handleSignInWithPasskey()" style="width: 100%;">🔑 Sign in with a passkey</button>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
           <a href="#" id="authToggleLink" onclick="toggleAuthMode(); return false;" style="color: var(--accent-secondary);">Need an account? Sign up</a>
           <a href="#" onclick="alert('Skill Issue 💀 There is no email on file, so there is no way to send a reset link. Pick a password you\'ll remember next time, or make a new account.'); return false;" style="color: var(--text-secondary);">Forgot password?</a>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- Modal for Edit Profile -->
   <div class="modal" id="profileModal">
-    <div class="modal-content" style="max-width: 400px;">
-      <button class="modal-close" onclick="closeProfileModal()">&times;</button>
-      <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Edit Profile</h2>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle" style="max-width: 400px;">
+      <button class="modal-close" aria-label="Close profile dialog" onclick="closeProfileModal()">&times;</button>
+      <h2 id="profileModalTitle" style="color: var(--accent-primary); margin-bottom: 1.5rem;">Edit Profile</h2>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <div>
           <label for="profileUsername" style="font-size: 0.85rem; color: var(--text-secondary);">Username</label>
@@ -1801,7 +1801,8 @@
         html += `
           <div style="background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
             <p style="color: var(--text-secondary); text-align: center;">
-              Sign in to vote for your favorite distro!
+              Sign in to vote for your favorite distro.
+              <button class="btn btn-secondary" onclick="openAuthModal('login')" style="margin-left: 0.5rem;">Log in</button>
             </p>
           </div>
         `;
@@ -1823,7 +1824,7 @@
                       <div style="display: flex; align-items: center; gap: 1rem;">
                         <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; min-width: 2rem;">#${index + 1}</span>
                         ${medal ? `<span style="font-size: 1.5rem;">${medal}</span>` : ''}
-                        <span style="font-size: 1.1rem; font-weight: 600; color: ${distro.color};">${distro.name}</span>
+                        <span style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">${distro.name}</span>
                       </div>
                       <div style="display: flex; align-items: center; gap: 1.5rem;">
                         <div style="text-align: right;">
@@ -1842,7 +1843,7 @@
             
             <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
               <p>Total Votes: <strong style="color: var(--accent-primary);">${totalVotes}</strong></p>
-              <p style="font-size: 0.85rem; margin-top: 0.5rem;">Leaderboard resets every 6 months</p>
+              <p style="font-size: 0.85rem; margin-top: 0.5rem;">You can change your vote every 6 months</p>
             </div>
           </div>
         </div>
@@ -1860,12 +1861,13 @@
           document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
           document.getElementById(section).classList.add('active');
           btn.classList.add('active');
+          window.scrollTo(0, 0);
         });
       });
     }
 
     // Quiz
-    function renderQuestion() {
+    function renderQuestion(focusQuestion = false) {
       try {
         if (currentQuestion >= quizQuestions.length) {
           showResults();
@@ -1879,7 +1881,7 @@
         const html = `
           <div class="question-card">
             <div class="question-number">Question ${currentQuestion + 1} of ${quizQuestions.length}</div>
-            <h2 class="question-text">${question.question}</h2>
+            <h2 class="question-text" id="currentQuestionTitle" tabindex="-1">${question.question}</h2>
             <div class="options">
               ${question.options.map((opt, idx) => `
                 <div class="option" data-value="${opt.value}" role="button" tabindex="0" aria-pressed="false" onclick="selectOption('${opt.value}')">
@@ -1905,6 +1907,8 @@
         if (answers[question.id]) {
           selectOption(answers[question.id], false);
         }
+
+        if (focusQuestion) document.getElementById('currentQuestionTitle').focus();
 
         // Re-setup tooltips after render
         setupTooltips();
@@ -1934,13 +1938,13 @@
 
     function nextQuestion() {
       currentQuestion++;
-      renderQuestion();
+      renderQuestion(true);
     }
 
     function previousQuestion() {
       if (currentQuestion > 0) {
         currentQuestion--;
-        renderQuestion();
+        renderQuestion(true);
       }
     }
 
@@ -1976,7 +1980,7 @@
           <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, ${brandColor}20 0%, transparent 70%); animation: pulse 4s ease-in-out infinite; pointer-events: none;"></div>
           
           <div style="position: relative; z-index: 1;">
-            <h2 class="result-title" style="color: ${brandColor};">${recommended.name}</h2>
+            <h2 class="result-title" id="quizResultTitle" tabindex="-1" style="color: var(--text-primary);">${recommended.name}</h2>
             <p class="result-subtitle">${recommended.description}</p>
             
             <div class="result-details">
@@ -2007,14 +2011,14 @@
             </div>
 
             <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-              ${recommended.tags.map(tag => `<span class="tag" style="background: ${brandColor}25; color: ${brandColor};">${tag}</span>`).join('')}
+              ${recommended.tags.map(tag => `<span class="tag" style="background: ${brandColor}25; color: var(--text-primary);">${tag}</span>`).join('')}
             </div>
 
             ${nvidiaWarning}
 
             <!-- Why This Distro Section -->
             <div style="background: var(--bg-secondary); border-left: 4px solid ${brandColor}; border-radius: 12px; padding: 2rem; margin-top: 2rem;">
-              <h3 style="color: ${brandColor}; margin-bottom: 1rem; font-size: 1.5rem;">🎯 Why ${recommended.name}?</h3>
+              <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.5rem;">🎯 Why ${recommended.name}?</h3>
               <div style="color: var(--text-secondary); line-height: 1.8;">
                 ${explanation}
               </div>
@@ -2027,24 +2031,27 @@
           </div>
         </div>
 
+        ${alternatives.length ? `
         <div class="alternatives">
           <h3>You might also like these:</h3>
           <div class="alt-grid">
             ${alternatives.map(distro => `
               <div class="alt-card" role="button" tabindex="0" onclick="showDistroModal('${distro.name}')" style="border-color: ${distro.brandColor || '#00d4ff'}44;">
-                <h4 style="color: ${distro.brandColor || '#00d4ff'};">${distro.name}</h4>
+                <h4 style="color: var(--text-primary);">${distro.name}</h4>
                 <p>${distro.description}</p>
                 <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                  ${distro.tags.slice(0, 3).map(tag => `<span class="tag" style="background: ${distro.brandColor || '#00d4ff'}25; color: ${distro.brandColor || '#00d4ff'};">${tag}</span>`).join('')}
+                  ${distro.tags.slice(0, 3).map(tag => `<span class="tag" style="background: ${distro.brandColor || '#00d4ff'}25; color: var(--text-primary);">${tag}</span>`).join('')}
                 </div>
               </div>
             `).join('')}
           </div>
         </div>
+        ` : ''}
       `;
 
       document.getElementById('quizContent').innerHTML = html;
       document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('quizResultTitle').focus();
     }
 
     function generateExplanation(distro) {
@@ -2145,6 +2152,16 @@
       return reasons.map(reason => `<p style="margin-bottom: 1rem;">• ${reason}</p>`).join('');
     }
 
+    function matchesImmutablePreference(distro) {
+      if (answers[5] === 'yes') return distro.immutable;
+      if (answers[5] === 'no') return !distro.immutable;
+      return true;
+    }
+
+    function matchesServerPreference(distro) {
+      return answers[9] !== 'server' || distro.useCase.includes('server');
+    }
+
     function calculateRecommendation() {
       const experience = answers[1];
       const deviceType = answers[2];
@@ -2158,7 +2175,7 @@
 
       let scores = {};
       
-      distros.forEach(distro => {
+      distros.filter(matchesImmutablePreference).filter(matchesServerPreference).forEach(distro => {
         let score = 0;
 
         // Experience level matching
@@ -2209,13 +2226,19 @@
         if (wantsImmutable === 'unsure') score += 10;
 
         // Base matching
-        if (base === distro.base || base === 'any') score += 15;
+        if (base !== 'any' && base === distro.base) score += 80;
 
         // Desktop matching
-        if (desktop === 'any' || distro.desktop === 'any' || desktop === distro.desktop) score += 10;
+        if (desktop !== 'any') {
+          if (desktop === distro.desktop) score += 30;
+          else if (distro.desktop === 'any') score += 15;
+        }
 
         // Release type
-        if (release === 'any' || distro.release === 'any' || release === distro.release) score += 15;
+        if (release !== 'any') {
+          if (release === distro.release) score += 40;
+          else if (distro.release === 'any') score += 20;
+        }
 
         // Use case
         if (distro.useCase.includes(useCase)) score += 20;
@@ -2228,26 +2251,37 @@
     }
 
     function calculateAlternatives(recommended) {
-      return distros
+      const eligibleDistros = distros
         .filter(d => d.name !== recommended.name)
+        .filter(matchesImmutablePreference)
+        .filter(matchesServerPreference);
+      const alternatives = eligibleDistros
         .filter(d => d.base === recommended.base || d.difficulty === recommended.difficulty)
         .slice(0, 3);
+
+      if (alternatives.length < 3) {
+        alternatives.push(...eligibleDistros
+          .filter(d => !alternatives.includes(d))
+          .slice(0, 3 - alternatives.length));
+      }
+
+      return alternatives;
     }
 
     function restartQuiz() {
       currentQuestion = 0;
       answers = {};
-      renderQuestion();
+      renderQuestion(true);
     }
 
     // Explore
     function renderExplore() {
       const html = distros.map(distro => `
         <div class="distro-card" role="button" tabindex="0" onclick="showDistroModal('${distro.name}')" style="border-color: ${distro.brandColor || '#00ff88'}33;">
-          <h3 style="color: ${distro.brandColor || '#00ff88'};">${distro.name}</h3>
+          <h3 style="color: var(--text-primary);">${distro.name}</h3>
           <p style="color: var(--text-secondary); margin-bottom: 1rem;">${distro.description}</p>
           <div class="distro-tags">
-            ${distro.tags.map(tag => `<span class="tag" style="background: ${distro.brandColor || '#00ff88'}25; color: ${distro.brandColor || '#00ff88'};">${tag}</span>`).join('')}
+            ${distro.tags.map(tag => `<span class="tag" style="background: ${distro.brandColor || '#00ff88'}25; color: var(--text-primary);">${tag}</span>`).join('')}
           </div>
         </div>
       `).join('');
@@ -2322,13 +2356,16 @@
       if (!modal.classList.contains('active')) modalOpeners.push(document.activeElement);
       modal.classList.add('active');
       for (const el of document.body.children) el.inert = el !== modal;
-      modal.querySelector('button, input, textarea, select, a[href]')?.focus();
+      const initialFocus = modal.querySelector('input:not([type="hidden"]), textarea, select')
+        || modal.querySelector('button:not(.modal-close), a[href]')
+        || modal.querySelector('.modal-close');
+      initialFocus?.focus();
     }
     function hideModalEl(id) {
       const modal = document.getElementById(id);
       if (!modal.classList.contains('active')) return;
       modal.classList.remove('active');
-      const top = document.querySelector('.modal.active');
+      const top = Array.from(document.querySelectorAll('.modal.active')).at(-1);
       for (const el of document.body.children) el.inert = !!top && el !== top;
       modalOpeners.pop()?.focus();
     }
@@ -2394,7 +2431,7 @@
           
           ${currentUser ? `
             <div class="comment-form">
-              <textarea id="commentInput" placeholder="Share your experience with ${distro.name}..."></textarea>
+              <textarea id="commentInput" aria-label="Write a comment" placeholder="Share your experience with ${distro.name}..."></textarea>
               <button class="btn btn-primary" onclick="submitComment('${distroName}')" style="margin-top: 1rem;">Post Comment</button>
             </div>
           ` : `
@@ -2458,6 +2495,7 @@
     }
 
     async function deleteComment(distroName, commentId) {
+      if (!confirm('Delete this comment? This cannot be undone.')) return;
       const { error } = await supabaseClient.from('comments').delete().eq('id', commentId);
       if (error) {
         alert('Could not delete comment.');
@@ -2732,6 +2770,7 @@
 
     function renderAuth() {
       const container = document.getElementById('authContainer');
+      const restoreFocus = container.contains(document.activeElement);
 
       if (currentUser) {
         const avatarUrl = currentUser.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=00ff88&color=0a0e27`;
@@ -2753,6 +2792,8 @@
           </div>
         `;
       }
+
+      if (restoreFocus) container.querySelector('button')?.focus();
     }
 
     async function logout() {
@@ -2805,9 +2846,10 @@
     // Close any open modal with Escape
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-      closeModal();
-      closeAuthModal();
-      closeProfileModal();
+      const topmostModal = Array.from(document.querySelectorAll('.modal.active')).at(-1);
+      if (topmostModal?.id === 'distroModal') closeModal();
+      else if (topmostModal?.id === 'authModal') closeAuthModal();
+      else if (topmostModal?.id === 'profileModal') closeProfileModal();
     });
   </script>
 </body>
