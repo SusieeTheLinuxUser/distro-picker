@@ -2616,6 +2616,7 @@
 
     function updateAuthModalUI() {
       const isLogin = authMode === 'login';
+      document.getElementById('authAlert').textContent = '';
       document.getElementById('authTitle').textContent = isLogin ? 'Log In' : 'Sign Up';
       document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Sign Up';
       document.getElementById('authToggleLink').textContent = isLogin ? 'Need an account? Sign up' : 'Already have an account? Log in';
@@ -2650,6 +2651,7 @@
       document.getElementById('profileNewPassword').value = '';
       document.getElementById('profileAvatarFile').value = '';
       document.getElementById('profileAvatarStatus').textContent = '';
+      document.getElementById('profileAlert').textContent = '';
       const preview = document.getElementById('profileAvatarPreview');
       if (currentUser.avatar_url) {
         preview.src = currentUser.avatar_url;
