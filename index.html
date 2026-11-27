@@ -995,7 +995,7 @@
 
   <!-- Modal for Distro Details -->
   <div class="modal" id="distroModal">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Distro details">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="distroModalTitle">
       <button class="modal-close" aria-label="Close distro details" onclick="closeModal()">&times;</button>
       <div id="modalContent"></div>
     </div>
@@ -2394,7 +2394,7 @@
         .replace(/rEFInd/g, '<span class="wiki-term" data-term="refind">rEFInd</span>');
 
       const html = `
-        <h2 style="color: var(--accent-primary); margin-bottom: 1rem;">${distro.name}</h2>
+        <h2 id="distroModalTitle" style="color: var(--accent-primary); margin-bottom: 1rem;">${distro.name}</h2>
         <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">${distro.description}</p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
