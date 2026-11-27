@@ -33,6 +33,23 @@
       box-sizing: border-box;
     }
 
+    /* Skip link: visually hidden until focused (keyboard users jump past the nav) */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 2001;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 2px solid var(--accent-primary);
+      border-radius: 0 0 8px 8px;
+    }
+
+    .skip-link:focus {
+      left: 0;
+    }
+
     :root {
       --bg-primary: #0a0e27;
       --bg-secondary: #151b3d;
@@ -815,6 +832,7 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <header>
     <h1>DistroPicker</h1>
     <p class="tagline">Find your perfect Linux distribution in minutes</p>
@@ -834,7 +852,7 @@
     <div id="authContainer"></div>
   </nav>
 
-  <div class="container">
+  <div class="container" id="main-content" tabindex="-1">
     <!-- Quiz Section -->
     <section id="quiz" class="section active">
       <div class="quiz-container">
