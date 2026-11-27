@@ -33,6 +33,34 @@
       box-sizing: border-box;
     }
 
+    /* Skip link: visually hidden until focused (keyboard users jump past the nav) */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 2001;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 2px solid var(--accent-primary);
+      border-radius: 0 0 8px 8px;
+    }
+
+    .skip-link:focus {
+      left: 0;
+    }
+
+    /* Same visually-hidden technique as the skip link, for live regions:
+       announced to screen readers, zero pixels on screen */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
     :root {
       --bg-primary: #0a0e27;
       --bg-secondary: #151b3d;
@@ -815,6 +843,7 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <header>
     <h1>DistroPicker</h1>
     <p class="tagline">Find your perfect Linux distribution in minutes</p>
@@ -834,14 +863,15 @@
     <div id="authContainer"></div>
   </nav>
 
-  <div class="container">
+  <div class="container" id="main-content" tabindex="-1">
     <!-- Quiz Section -->
     <section id="quiz" class="section active">
       <div class="quiz-container">
-        <div class="progress-bar">
+        <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0">
           <div class="progress-fill" id="progressFill" style="width: 0%"></div>
         </div>
         <div id="quizContent"></div>
+        <div id="quizAnnouncer" class="visually-hidden" aria-live="polite"></div>
       </div>
     </section>
 
@@ -973,7 +1003,8 @@
   <audio id="bgm" src="bgm.mp3" loop muted preload="none"></audio>
   <button
     id="muteBtn"
-    aria-label="Toggle background music"
+    aria-label="Background music"
+    aria-pressed="false"
     title="Music: Milkoi - LAST TIME (NCS - Copyright Free Music)"
     style="position: fixed; bottom: 1rem; left: 1rem; z-index: 1000; width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--accent-primary); font-size: 1.3rem; cursor: pointer; box-shadow: var(--shadow);"
   >🔇</button>
@@ -986,6 +1017,7 @@
         bgm.muted = !bgm.muted;
         if (!bgm.muted) bgm.play();
         muteBtn.textContent = bgm.muted ? '🔇' : '🔊';
+        muteBtn.setAttribute('aria-pressed', bgm.muted ? 'false' : 'true');
       });
     })();
   </script>
@@ -995,7 +1027,7 @@
 
   <!-- Modal for Distro Details -->
   <div class="modal" id="distroModal">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Distro details">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="distroModalTitle">
       <button class="modal-close" aria-label="Close distro details" onclick="closeModal()">&times;</button>
       <div id="modalContent"></div>
     </div>
@@ -1007,6 +1039,7 @@
       <button class="modal-close" aria-label="Close authentication dialog" onclick="closeAuthModal()">&times;</button>
       <h2 id="authTitle" style="color: var(--accent-primary); margin-bottom: 1.5rem;">Log In</h2>
       <form onsubmit="handleAuthSubmit(); return false;" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div id="authAlert" class="visually-hidden" role="alert"></div>
         <input id="authUsername" type="text" aria-label="Username" placeholder="Username" autocomplete="username" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         <input id="authPassword" type="password" aria-label="Password" placeholder="Password" autocomplete="current-password" style="padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         <button type="submit" class="btn btn-primary" id="authSubmitBtn">Log In</button>
@@ -1026,6 +1059,7 @@
     <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle" style="max-width: 400px;">
       <button class="modal-close" aria-label="Close profile dialog" onclick="closeProfileModal()">&times;</button>
       <h2 id="profileModalTitle" style="color: var(--accent-primary); margin-bottom: 1.5rem;">Edit Profile</h2>
+      <div id="profileAlert" class="visually-hidden" role="alert"></div>
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <div>
           <label for="profileUsername" style="font-size: 0.85rem; color: var(--text-secondary);">Username</label>
@@ -1037,7 +1071,7 @@
             <img id="profileAvatarPreview" src="" alt="" class="user-avatar" style="display: none;">
             <input id="profileAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="handleAvatarFileSelect(event)" style="flex: 1; color: var(--text-secondary); font-size: 0.85rem;">
           </div>
-          <span id="profileAvatarStatus" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
+          <span id="profileAvatarStatus" aria-live="polite" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
           <input id="profileAvatarUrl" type="text" aria-label="Avatar image URL" placeholder="...or paste an image URL" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-family: 'Outfit', sans-serif;">
         </div>
         <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
@@ -1834,7 +1868,7 @@
                           <div style="font-size: 0.85rem; color: var(--text-secondary);">${percentage}%</div>
                         </div>
                         ${currentUser && userCanVote ? `
-                          <button onclick="voteForDistro('${distro.name}')" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Vote</button>
+                          <button onclick="voteForDistro('${distro.name}')" aria-label="Vote for ${distro.name}" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Vote</button>
                         ` : ''}
                       </div>
                     </div>
@@ -1879,6 +1913,9 @@
         const question = quizQuestions[currentQuestion];
         const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
         document.getElementById('progressFill').style.width = progress + '%';
+        const progressBar = document.getElementById('progressBar');
+        progressBar.setAttribute('aria-valuenow', String(currentQuestion + 1));
+        progressBar.setAttribute('aria-valuetext', `Question ${currentQuestion + 1} of ${quizQuestions.length}`);
 
         const html = `
           <div class="question-card">
@@ -2053,6 +2090,10 @@
 
       document.getElementById('quizContent').innerHTML = html;
       document.getElementById('progressFill').style.width = '100%';
+      const progressBar = document.getElementById('progressBar');
+      progressBar.setAttribute('aria-valuenow', String(quizQuestions.length));
+      progressBar.setAttribute('aria-valuetext', 'Quiz complete');
+      document.getElementById('quizAnnouncer').textContent = `Recommended distro: ${recommended.name}`;
       document.getElementById('quizResultTitle').focus();
     }
 
@@ -2394,7 +2435,7 @@
         .replace(/rEFInd/g, '<span class="wiki-term" data-term="refind">rEFInd</span>');
 
       const html = `
-        <h2 style="color: var(--accent-primary); margin-bottom: 1rem;">${distro.name}</h2>
+        <h2 id="distroModalTitle" style="color: var(--accent-primary); margin-bottom: 1rem;">${distro.name}</h2>
         <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">${distro.description}</p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
@@ -2575,6 +2616,7 @@
 
     function updateAuthModalUI() {
       const isLogin = authMode === 'login';
+      document.getElementById('authAlert').textContent = '';
       document.getElementById('authTitle').textContent = isLogin ? 'Log In' : 'Sign Up';
       document.getElementById('authSubmitBtn').textContent = isLogin ? 'Log In' : 'Sign Up';
       document.getElementById('authToggleLink').textContent = isLogin ? 'Need an account? Sign up' : 'Already have an account? Log in';
@@ -2609,6 +2651,7 @@
       document.getElementById('profileNewPassword').value = '';
       document.getElementById('profileAvatarFile').value = '';
       document.getElementById('profileAvatarStatus').textContent = '';
+      document.getElementById('profileAlert').textContent = '';
       const preview = document.getElementById('profileAvatarPreview');
       if (currentUser.avatar_url) {
         preview.src = currentUser.avatar_url;
@@ -2667,7 +2710,7 @@
       const avatarUrl = document.getElementById('profileAvatarUrl').value.trim();
 
       if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-        alert('Username must be 3-20 characters: letters, numbers, underscores only.');
+        announceProfileError('Username must be 3-20 characters: letters, numbers, underscores only.');
         return;
       }
 
@@ -2677,7 +2720,7 @@
         .eq('id', currentUser.id);
 
       if (error) {
-        alert(error.message.toLowerCase().includes('duplicate') ? 'That username is taken.' : 'Could not save profile, try again.');
+        announceProfileError(error.message.toLowerCase().includes('duplicate') ? 'That username is taken.' : 'Could not save profile, try again.');
         return;
       }
 
@@ -2691,7 +2734,7 @@
       const password = document.getElementById('profileNewPassword').value;
 
       if (password.length < 6) {
-        alert('Password must be at least 6 characters.');
+        announceProfileError('Password must be at least 6 characters.');
         return;
       }
 
@@ -2701,7 +2744,7 @@
 
       const { error } = await supabaseClient.auth.updateUser({ password });
       if (error) {
-        alert('Could not change password: ' + error.message);
+        announceProfileError('Could not change password: ' + error.message);
         return;
       }
 
@@ -2726,11 +2769,11 @@
       const password = document.getElementById('authPassword').value;
 
       if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-        alert('Username must be 3-20 characters: letters, numbers, underscores only.');
+        announceAuthError('Username must be 3-20 characters: letters, numbers, underscores only.');
         return;
       }
       if (password.length < 6) {
-        alert('Password must be at least 6 characters.');
+        announceAuthError('Password must be at least 6 characters.');
         return;
       }
 
@@ -2741,7 +2784,7 @@
       });
 
       if (error) {
-        alert(error.message.toLowerCase().includes('duplicate') || error.message.toLowerCase().includes('already') ? 'That username is taken.' : error.message);
+        announceAuthError(error.message.toLowerCase().includes('duplicate') || error.message.toLowerCase().includes('already') ? 'That username is taken.' : error.message);
         return;
       }
 
@@ -2758,13 +2801,13 @@
 
       // Same rule as sign-up; also keeps '*' (a PostgREST wildcard) out of the query.
       if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-        alert('Wrong username or password.');
+        announceAuthError('Wrong username or password.');
         return;
       }
 
       const { data: profile } = await supabaseClient.from('profiles').select('id').ilike('username', escapeLike(username)).maybeSingle();
       if (!profile) {
-        alert('Wrong username or password.');
+        announceAuthError('Wrong username or password.');
         return;
       }
 
@@ -2774,7 +2817,7 @@
       });
 
       if (error) {
-        alert('Wrong username or password.');
+        announceAuthError('Wrong username or password.');
         return;
       }
 
@@ -2833,6 +2876,18 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    // Form errors go into the modal's role="alert" region so screen readers
+    // announce them, and keep the alert() dialog sighted users already get.
+    function announceAuthError(message) {
+      document.getElementById('authAlert').textContent = message;
+      alert(message);
+    }
+
+    function announceProfileError(message) {
+      document.getElementById('profileAlert').textContent = message;
+      alert(message);
     }
 
     // Close modal on click outside
