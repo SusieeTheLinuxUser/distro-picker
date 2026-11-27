@@ -30,7 +30,7 @@ The main `<script>` near the bottom holds, in order:
 - `supabaseClient` — Supabase client (publishable key, meant to be public).
 - Startup in the `DOMContentLoaded` handler.
 - Quiz: `renderQuestion`, `selectOption`, `showResults`, `generateExplanation`.
-- **Scoring:** `calculateRecommendation()` adds points per distro for each answer (experience, device, GPU, RAM, immutable, base, desktop, release, use case) and picks the highest. On a tie the **later** distro in the array wins (`reduce` with `>`). `calculateAlternatives()` takes the first 3 distros with the same base or difficulty.
+- **Scoring:** `calculateRecommendation()` adds points per distro for each answer (experience, device, GPU, RAM, immutable, base, desktop, release, use case) and picks the highest. On a tie the **later** distro in the array wins (`reduce` with `>`). `calculateAlternatives()` takes the first 3 distros with the same base or difficulty, padding with any other eligible distro when fewer than 3 match.
 - Leaderboard (`loadVotes`, `voteForDistro`, `renderLeaderboard`): one vote per user, changeable every 6 months.
 - Distro modal with comments, auth, profile, passkeys, avatar upload.
 
@@ -54,7 +54,7 @@ node -e '
 const h=require("fs").readFileSync("index.html","utf8");
 const js=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].pop()[1];
 const data=js.slice(js.indexOf("const wikiTerms"),js.indexOf("// Supabase"));
-const fn=js.slice(js.indexOf("function calculateRecommendation"),js.indexOf("function calculateAlternatives"));
+const fn=js.slice(js.indexOf("function matchesImmutablePreference"),js.indexOf("function calculateAlternatives"));
 const answers={1:"beginner",2:"laptop",3:"nvidia",4:"16gb",5:"no",6:"any",7:"any",8:"any",9:"gaming"};
 console.log(new Function("answers",data+fn+"return [distros.length, calculateRecommendation().name]")(answers));'
 ```
