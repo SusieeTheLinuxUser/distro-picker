@@ -838,7 +838,7 @@
     <!-- Quiz Section -->
     <section id="quiz" class="section active">
       <div class="quiz-container">
-        <div class="progress-bar">
+        <div class="progress-bar" id="progressBar" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0">
           <div class="progress-fill" id="progressFill" style="width: 0%"></div>
         </div>
         <div id="quizContent"></div>
@@ -1879,6 +1879,9 @@
         const question = quizQuestions[currentQuestion];
         const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
         document.getElementById('progressFill').style.width = progress + '%';
+        const progressBar = document.getElementById('progressBar');
+        progressBar.setAttribute('aria-valuenow', String(currentQuestion + 1));
+        progressBar.setAttribute('aria-valuetext', `Question ${currentQuestion + 1} of ${quizQuestions.length}`);
 
         const html = `
           <div class="question-card">
@@ -2053,6 +2056,9 @@
 
       document.getElementById('quizContent').innerHTML = html;
       document.getElementById('progressFill').style.width = '100%';
+      const progressBar = document.getElementById('progressBar');
+      progressBar.setAttribute('aria-valuenow', String(quizQuestions.length));
+      progressBar.setAttribute('aria-valuetext', 'Quiz complete');
       document.getElementById('quizResultTitle').focus();
     }
 
