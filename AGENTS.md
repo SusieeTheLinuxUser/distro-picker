@@ -7,7 +7,7 @@ Handoff notes for anyone (human or agent) working on this repo.
 - `dev` is the default branch. Branch from `origin/dev` and open PRs into `dev` (`gh pr create --base dev`).
 - `main` is prod: GitHub Pages builds distropicker.com from it, so a merge to `main` is a deploy. A release is a PR from `dev` into `main`, merged with a merge commit.
 - Both branches are protected by the ruleset "Protect dev and prod": no deletion, no force push, changes only through a PR. There is no CI.
-- Nothing else lives on GitHub: delete a branch once its PR is merged (`gh pr merge --delete-branch`).
+- Nothing else lives on GitHub: delete a feature branch once its PR is merged (`gh pr merge --delete-branch`). Never pass `--delete-branch` on a release PR (`dev` into prod): its head branch is `dev`.
 
 ## What it is
 
