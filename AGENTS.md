@@ -87,3 +87,10 @@ Change `answers` (values come from `quizQuestions` options). This relies on the 
 - Modal focus: `showModalEl` records the opener only when the modal is closed, so re-rendering an open modal (post/delete comment calls `showDistroModal` again) is safe. Don't remove that guard, or Esc sends focus to `<body>`.
 - Console logs still say "DistroMatch" (old name).
 - Avatar uploads allow only PNG, JPEG, WebP and GIF because SVG can run scripts on the storage domain; `openAuthModal` shows an alert and returns when `supabaseClient` is null. `canVote()` and the "next vote" message both use `nextVoteDateFrom()` so they agree at month end.
+- Accessibility hooks from round 4 (#23) — keep them working:
+    - The skip link jumps to `#main-content`.
+    - `#quizAnnouncer` (aria-live) is filled by `showResults`.
+    - `authAlert`/`profileAlert` (role="alert") are filled by `announceAuthError`/`announceProfileError` and cleared when the dialog opens or switches mode.
+    - The progressbar's `aria-valuenow`/`aria-valuetext` are set in `renderQuestion` and `showResults`.
+    - Vote buttons carry `aria-label="Vote for <name>"`.
+- Tab focus trap (round 5): the global keydown handler keeps Tab inside the topmost open dialog, wrapping at the first/last focusable element via the pure `wrapFocusIndex()` (node-tested). Escape still closes dialogs, and the focus-return guard in `showModalEl`/`hideModalEl` stays untouched.

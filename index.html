@@ -2915,8 +2915,32 @@
       e.target.click();
     });
 
-    // Close any open modal with Escape
+    // Pure wrap-around math for the Tab trap below: the next index cycling
+    // forward, or backwards when shift is true. Returns -1 when there is nothing to cycle.
+    function wrapFocusIndex(count, index, shift) {
+      if (count <= 0) return -1;
+      return (index + (shift ? -1 : 1) + count) % count;
+    }
+
+    // Close any open modal with Escape; keep Tab cycling inside the topmost open modal
     document.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        const modal = Array.from(document.querySelectorAll('.modal.active')).at(-1);
+        if (!modal) return;
+        const content = modal.querySelector('.modal-content');
+        if (!content) return;
+        const focusables = Array.from(content.querySelectorAll(
+          'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+        )).filter(el => !el.disabled && el.getClientRects().length > 0);
+        if (!focusables.length) return;
+        const current = focusables.indexOf(document.activeElement);
+        const next = current < 0
+          ? (e.shiftKey ? focusables.length - 1 : 0)
+          : wrapFocusIndex(focusables.length, current, e.shiftKey);
+        e.preventDefault();
+        focusables[next].focus();
+        return;
+      }
       if (e.key !== 'Escape') return;
       const topmostModal = Array.from(document.querySelectorAll('.modal.active')).at(-1);
       if (topmostModal?.id === 'distroModal') closeModal();
