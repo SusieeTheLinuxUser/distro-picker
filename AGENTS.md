@@ -2,6 +2,13 @@
 
 Handoff notes for anyone (human or agent) working on this repo.
 
+## Branches (since 2026-11-28)
+
+- `dev` is the default branch. Branch from `origin/dev` and open PRs into `dev` (`gh pr create --base dev`).
+- `main` is prod: GitHub Pages builds distropicker.com from it, so a merge to `main` is a deploy. A release is a PR from `dev` into `main`, merged with a merge commit.
+- Both branches are protected by the ruleset "Protect dev and prod": no deletion, no force push, changes only through a PR. There is no CI.
+- Nothing else lives on GitHub: delete a branch once its PR is merged (`gh pr merge --delete-branch`).
+
 ## What it is
 
 DistroPicker: a quiz that recommends a Linux distro, plus Explore (distro cards), a Wiki of terms, an install guide and a community leaderboard with comments.
